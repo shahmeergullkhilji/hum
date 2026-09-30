@@ -1,0 +1,7 @@
+{
+  "name": "humsafar-rishta",
+  "private": true,
+  "dependencies": {
+    "firebase-admin": "^14.4.0"
+  }
+}
