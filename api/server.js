@@ -77,7 +77,7 @@ function getAdminPassword() {
 // ---------- Fields ----------
 
 const fields = [
-  'proposal_id', 'gender', 'age', 'city', 'education', 'profession', 'height',
+  'proposal_id', 'gender', 'age', 'city', 'education', 'ethnicity', 'profession', 'height',
   'marital_status', 'religion', 'siblings', 'siblings_details', 'family_background', 'about', 'looking_for',
   'image_url', 'status', 'created_at'
 ];
