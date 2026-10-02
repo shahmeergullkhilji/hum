@@ -349,11 +349,11 @@ input,select,textarea{ font-family:var(--font-naskh); }
   border:3px solid var(--gold); padding:10px; margin:0 auto;
   background:radial-gradient(circle at 30% 20%, var(--rose), var(--cream) 70%);
   box-shadow:0 18px 40px rgba(107,23,52,.18);
-  position:circle;
+  position:relative;
 }
 .founder-frame::before{
   content:''; position:absolute; inset:-14px; border:1px solid var(--gold-light);
-  border-radius:50%; opacity:.6;
+  border-radius:50%; opacity:.6; pointer-events:none;
 }
 .feature-card{
   background:#fff; border:1px solid rgba(201,162,39,.3); border-radius:18px;
@@ -766,7 +766,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
       <div class="reveal flex justify-center">
         <div class="founder-frame">
           <div style="width:100%; height:100%; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--maroon-dark);">
-            <img src="images.jpeg" alt="میراہمسفر" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" loading="lazy" decoding="async">
+            <img src="images.jpeg?v=4" alt="محمد ارشد خلجی - میرا ہمسفر" style="width:100%; height:100%; object-fit:cover; object-position:center 8%; border-radius:50%; display:block;" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
@@ -1186,7 +1186,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
             </div>
             <div class="a-field">
               <label>عمر</label>
-              <input type="number" id="pAge" class="eng" min="18" max="70" required>
+              <input type="text" id="pAge" class="eng" required>
             </div>
             <div class="a-field">
               <label>شہر</label>
@@ -1229,10 +1229,48 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
               </select>
               <div id="pReligionWrap" class="hidden mt-2"><input type="text" id="pReligion"></div>
             </div>
-            <div class="a-field">
-              <label>بہن بھاِئی</label>
-              <input type="text" id="pSiblings" placeholder="مثلاً: 2 بھائی، 1 بہن" class="eng">
-      
+            <div class="a-field sm:col-span-2">
+              <label>بہن بھائی</label>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <fieldset class="rounded-xl border border-[#e4d9c6] p-4" data-sibling-group="brothers">
+                  <legend class="px-2 font-semibold text-[#6B1734]">بھائی</legend>
+                  <span class="block text-sm mb-2">تعداد</span>
+                  <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="0" checked style="width:auto;"> کوئی نہیں</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="1" style="width:auto;"> 1</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="2" style="width:auto;"> 2</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="3" style="width:auto;"> 3</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="4" style="width:auto;"> 4</label>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label>شادی شدہ
+                      <input type="number" data-sibling-married min="0" max="4" value="0" class="eng">
+                    </label>
+                    <label>غیر شادی شدہ
+                      <input type="number" data-sibling-unmarried min="0" max="4" value="0" class="eng">
+                    </label>
+                  </div>
+                </fieldset>
+                <fieldset class="rounded-xl border border-[#e4d9c6] p-4" data-sibling-group="sisters">
+                  <legend class="px-2 font-semibold text-[#6B1734]">بہنیں</legend>
+                  <span class="block text-sm mb-2">تعداد</span>
+                  <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="0" checked style="width:auto;"> کوئی نہیں</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="1" style="width:auto;"> 1</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="2" style="width:auto;"> 2</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="3" style="width:auto;"> 3</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="4" style="width:auto;"> 4</label>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label>شادی شدہ
+                      <input type="number" data-sibling-married min="0" max="4" value="0" class="eng">
+                    </label>
+                    <label>غیر شادی شدہ
+                      <input type="number" data-sibling-unmarried min="0" max="4" value="0" class="eng">
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
             </div>
             <div class="a-field">
               <label>پروفائل تصویر</label>
@@ -1853,6 +1891,48 @@ function getNextProposalId(){
   return 'HR-' + (maxNum + 1);
 }
 
+function readSiblingGroup(group){
+  const fieldset = document.querySelector(`[data-sibling-group="${group}"]`);
+  const selected = fieldset.querySelector('[data-sibling-count]:checked');
+  if(!selected) return null;
+  return {
+    total: Number(selected.dataset.siblingCount),
+    married: Number(fieldset.querySelector('[data-sibling-married]').value),
+    unmarried: Number(fieldset.querySelector('[data-sibling-unmarried]').value)
+  };
+}
+
+function setSiblingGroup(group, values){
+  const fieldset = document.querySelector(`[data-sibling-group="${group}"]`);
+  const total = Number(values?.total);
+  const married = Number(values?.married);
+  const unmarried = Number(values?.unmarried);
+  const valid = Number.isInteger(total) && total >= 0 && total <= 4 &&
+    Number.isInteger(married) && married >= 0 && married <= 4 &&
+    Number.isInteger(unmarried) && unmarried >= 0 && unmarried <= 4 &&
+    married + unmarried === total;
+  const selectedTotal = valid ? total : 0;
+  fieldset.querySelectorAll('[data-sibling-count]').forEach(input=>{
+    input.checked = Number(input.dataset.siblingCount) === selectedTotal;
+  });
+  fieldset.querySelector('[data-sibling-married]').value = valid ? married : 0;
+  fieldset.querySelector('[data-sibling-unmarried]').value = valid ? unmarried : 0;
+}
+
+document.querySelectorAll('[data-sibling-group]').forEach(fieldset=>{
+  fieldset.querySelectorAll('[data-sibling-count]').forEach(input=>{
+    input.addEventListener('change', ()=>{
+      if(input.checked){
+        fieldset.querySelectorAll('[data-sibling-count]').forEach(option=>{
+          if(option !== input) option.checked = false;
+        });
+      } else if(!fieldset.querySelector('[data-sibling-count]:checked')){
+        input.checked = true;
+      }
+    });
+  });
+});
+
 function editProposal(id){
   const p = proposals.find(x=>String(x.id)===String(id) || String(x.proposal_id)===String(id));
   if(!p) return;
@@ -1860,6 +1940,14 @@ function editProposal(id){
   document.getElementById('pProposalId').value = p.proposal_id;
   document.getElementById('pGender').value = p.gender;
   document.getElementById('pAge').value = p.age;
+  let siblingData = {};
+  try {
+    siblingData = JSON.parse(p.siblings || '{}');
+  } catch(err) {
+    console.warn('Unable to load saved sibling counts:', err);
+  }
+  setSiblingGroup('brothers', siblingData.brothers);
+  setSiblingGroup('sisters', siblingData.sisters);
   document.getElementById('pCity').value = p.city;
   document.getElementById('pEducation').value = p.education;
   document.getElementById('pProfession').value = p.profession;
@@ -1930,7 +2018,9 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
   const data = {
     proposal_id: pid,
     gender: document.getElementById('pGender').value,
-    age: parseInt(document.getElementById('pAge').value, 10),
+    age: document.getElementById('pAge').value.trim(),
+    siblings: '',
+    siblings_details: '',
     city: document.getElementById('pCity').value,
     education: document.getElementById('pEducation').value.trim(),
     profession: document.getElementById('pProfession').value.trim(),
@@ -1943,6 +2033,21 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
     status: document.getElementById('pStatus').value,
     created_at: new Date().toISOString().slice(0, 10)
   };
+  const brothers = readSiblingGroup('brothers');
+  const sisters = readSiblingGroup('sisters');
+  const validSiblingCounts = [brothers, sisters].every(sibling=>
+    sibling &&
+    Number.isInteger(sibling.total) && sibling.total >= 0 && sibling.total <= 4 &&
+    Number.isInteger(sibling.married) && sibling.married >= 0 && sibling.married <= 4 &&
+    Number.isInteger(sibling.unmarried) && sibling.unmarried >= 0 && sibling.unmarried <= 4 &&
+    sibling.married + sibling.unmarried === sibling.total
+  );
+  if(!validSiblingCounts){
+    showToast('بھائیوں اور بہنوں کی تعداد شادی شدہ اور غیر شادی شدہ تعداد کے برابر ہونی چاہیے');
+    return;
+  }
+  data.siblings = JSON.stringify({brothers, sisters});
+  data.siblings_details = `Brothers: ${brothers.married} married, ${brothers.unmarried} unmarried; Sisters: ${sisters.married} married, ${sisters.unmarried} unmarried`;
 
   let imageUrl = '';
   const fileInput = document.getElementById('pImage');
