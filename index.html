@@ -1101,12 +1101,11 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
       <div id="tabAdd" class="hidden">
         <h2 id="addFormTitle" style="font-family:var(--font-naskh); font-size:1.6rem; font-weight:700; color:var(--maroon-dark); margin-bottom:22px;">نیا پروپوزل شامل کریں</h2>
         <div class="admin-panel">
-          <form id="proposalForm" class="grid sm:grid-cols-2 gap-5">
+          <form id="proposalForm" novalidate class="grid sm:grid-cols-2 gap-5">
             <input type="hidden" id="pInternalId">
             <div class="a-field">
               <label>پروپوزل آئی ڈی</label>
-              <input type="text" id="pProposalId" class="eng" required>
-              
+              <input type="text" id="pProposalId" class="eng" placeholder="مثلاً: HR-1001">
             </div>
             <div class="a-field">
               <label>جنس</label>
@@ -1215,7 +1214,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
               <select id="pStatus"><option value="Active">فعال (Active)</option><option value="Hidden">مخفی (Hidden)</option></select>
             </div>
             <div class="sm:col-span-2 flex gap-4 mt-2">
-              <button type="submit" class="btn btn-fill">save</button>
+              <button type="submit" id="pSaveBtn" class="btn btn-fill">save</button>
               <button type="button" onclick="resetProposalForm()" class="btn btn-outline">clear form</button>
             </div>
           </form>
@@ -2176,111 +2175,124 @@ function compressImage(file, maxDim = 800, quality = 0.75){
 
 document.getElementById('proposalForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  const internalId = document.getElementById('pInternalId').value;
-  let pid = document.getElementById('pProposalId').value.trim();
-  if(!pid) pid = getNextProposalId();
-
-  // Validate duplicate proposal ID when creating new
-  if(!internalId && proposals.some(x => String(x.proposal_id).toLowerCase() === pid.toLowerCase())){
-    showToast('یہ پروپوزل آئی ڈی پہلے سے موجود ہے');
-    return;
+  const saveBtn = document.getElementById('pSaveBtn') || this.querySelector('button[type="submit"]');
+  const originalBtnText = saveBtn ? saveBtn.textContent : 'save';
+  if(saveBtn){
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'محفوظ ہو رہا ہے...';
   }
-
-  let religionVal = (document.getElementById('pReligion')?.value || '').trim();
-  if(!religionVal){
-    religionVal = (document.getElementById('pReligionSelect')?.value || '').trim();
-    if(religionVal === 'NA' || religionVal === 'دیگر') religionVal = '';
-  }
-
-  const brothers = readSiblingGroup('brothers');
-  const sisters = readSiblingGroup('sisters');
-  const siblingsJson = JSON.stringify({brothers, sisters});
-  const siblingsDetails = formatSiblingsDisplay(siblingsJson);
-
-  const data = {
-    proposal_id: pid,
-    gender: document.getElementById('pGender').value,
-    age: (document.getElementById('pAge').value || '').trim(),
-    city: (document.getElementById('pCity')?.value || '').trim(),
-    ethnicity: (document.getElementById('pEthnicity')?.value || '').trim(),
-    education: (document.getElementById('pEducation').value || '').trim(),
-    profession: (document.getElementById('pProfession').value || '').trim(),
-    height: (document.getElementById('pHeight').value || '').trim(),
-    marital_status: document.getElementById('pMarital').value,
-    religion: religionVal,
-    siblings: siblingsJson,
-    siblings_details: siblingsDetails,
-    brothers: String(brothers.total || 0),
-    brothers_married: String(brothers.married || 0),
-    brothers_unmarried: String(brothers.unmarried || 0),
-    sisters: String(sisters.total || 0),
-    sisters_married: String(sisters.married || 0),
-    sisters_unmarried: String(sisters.unmarried || 0),
-    family_background: (document.getElementById('pFamily').value || '').trim(),
-    about: (document.getElementById('pAbout').value || '').trim(),
-    looking_for: (document.getElementById('pLookingFor').value || '').trim(),
-    status: document.getElementById('pStatus').value,
-    created_at: new Date().toISOString().slice(0, 10)
-  };
-
-  let imageUrl = '';
-  const fileInput = document.getElementById('pImage');
-  if(fileInput.files && fileInput.files[0]){
-    try {
-      imageUrl = await compressImage(fileInput.files[0]);
-    } catch(err){}
-  }
-
-  const payload = Object.assign({}, data, imageUrl ? {image_url: imageUrl} : {});
-  const endpoint = internalId ? `${API_BASE}/api/proposals/${encodeURIComponent(internalId)}` : `${API_BASE}/api/proposals`;
-  
-  let saved = null;
-  let isOnline = false;
 
   try {
-    const response = await fetch(endpoint, {
-      method: internalId ? 'PUT' : 'POST',
-      credentials: 'include',
-      headers: getAdminHeaders({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(payload)
-    });
-    if(response.ok){
-      saved = await response.json();
-      isOnline = true;
-    } else {
+    const internalId = (document.getElementById('pInternalId')?.value || '').trim();
+    let pid = (document.getElementById('pProposalId')?.value || '').trim();
+    if(!pid) pid = getNextProposalId();
+
+    // Validate duplicate proposal ID when creating new
+    if(!internalId && proposals.some(x => String(x.proposal_id).toLowerCase() === pid.toLowerCase())){
+      showToast('یہ پروپوزل آئی ڈی پہلے سے موجود ہے');
+      return;
+    }
+
+    let religionVal = (document.getElementById('pReligion')?.value || '').trim();
+    if(!religionVal){
+      religionVal = (document.getElementById('pReligionSelect')?.value || '').trim();
+      if(religionVal === 'NA' || religionVal === 'دیگر') religionVal = '';
+    }
+
+    const brothers = typeof readSiblingGroup === 'function' ? readSiblingGroup('brothers') : { total: 0, married: 0, unmarried: 0 };
+    const sisters = typeof readSiblingGroup === 'function' ? readSiblingGroup('sisters') : { total: 0, married: 0, unmarried: 0 };
+    const siblingsJson = JSON.stringify({brothers, sisters});
+    const siblingsDetails = typeof formatSiblingsDisplay === 'function' ? formatSiblingsDisplay(siblingsJson) : '';
+
+    const data = {
+      proposal_id: pid,
+      gender: document.getElementById('pGender')?.value || 'مرد',
+      age: (document.getElementById('pAge')?.value || '').trim(),
+      city: (document.getElementById('pCity')?.value || '').trim(),
+      ethnicity: (document.getElementById('pEthnicity')?.value || '').trim(),
+      education: (document.getElementById('pEducation')?.value || '').trim(),
+      profession: (document.getElementById('pProfession')?.value || '').trim(),
+      height: (document.getElementById('pHeight')?.value || '').trim(),
+      marital_status: document.getElementById('pMarital')?.value || 'غیر شادی شدہ',
+      religion: religionVal,
+      siblings: siblingsJson,
+      siblings_details: siblingsDetails,
+      brothers: String(brothers.total || 0),
+      brothers_married: String(brothers.married || 0),
+      brothers_unmarried: String(brothers.unmarried || 0),
+      sisters: String(sisters.total || 0),
+      sisters_married: String(sisters.married || 0),
+      sisters_unmarried: String(sisters.unmarried || 0),
+      family_background: (document.getElementById('pFamily')?.value || '').trim(),
+      about: (document.getElementById('pAbout')?.value || '').trim(),
+      looking_for: (document.getElementById('pLookingFor')?.value || '').trim(),
+      status: document.getElementById('pStatus')?.value || 'Active',
+      created_at: new Date().toISOString().slice(0, 10)
+    };
+
+    let imageUrl = '';
+    const fileInput = document.getElementById('pImage');
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      try {
+        imageUrl = await compressImage(fileInput.files[0]);
+      } catch(err){
+        console.warn('Image compression failed:', err);
+      }
+    }
+
+    const payload = Object.assign({}, data, imageUrl ? {image_url: imageUrl} : {});
+    const endpoint = internalId ? `${API_BASE}/api/proposals/${encodeURIComponent(internalId)}` : `${API_BASE}/api/proposals`;
+    
+    let response;
+    try {
+      response = await fetch(endpoint, {
+        method: internalId ? 'PUT' : 'POST',
+        credentials: 'include',
+        headers: getAdminHeaders({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify(payload)
+      });
+    } catch(netErr) {
+      console.error('Proposal save request failed:', netErr);
+      throw new Error('سرور سے رابطہ نہیں ہو سکا۔ پروپوزل محفوظ نہیں ہوا۔');
+    }
+
+    if(!response.ok){
       const err = await response.json().catch(() => ({}));
       if(err && err.error && err.error.includes('UNIQUE')){
         showToast('یہ پروپوزل آئی ڈی پہلے سے موجود ہے');
         return;
       }
       console.error('Server save error response:', response.status, err);
-      showToast(`سرور خرابی (${response.status}): ${err.error || 'کلاؤڈ میں محفوظ نہیں ہو سکا'}`);
+      throw new Error(`سرور خرابی (${response.status}): ${err.error || 'پروپوزل ڈیٹا بیس میں محفوظ نہیں ہو سکا'}`);
     }
-  } catch(netErr) {
-    console.warn('Server offline, saving locally:', netErr);
-  }
 
-  if(!saved){
-    saved = Object.assign({ id: internalId || pid }, payload);
-  }
+    const saved = await response.json();
+    if(internalId){
+      const idx = proposals.findIndex(x => String(x.id) === String(internalId) || String(x.proposal_id) === String(internalId));
+      if(idx !== -1) Object.assign(proposals[idx], saved);
+      else proposals.unshift(saved);
+    } else {
+      proposals.unshift(saved);
+    }
 
-  if(internalId){
-    const idx = proposals.findIndex(x => String(x.id) === String(internalId) || String(x.proposal_id) === String(internalId));
-    if(idx !== -1) Object.assign(proposals[idx], saved);
-    else proposals.unshift(saved);
-  } else {
-    proposals.unshift(saved);
+    saveProposalsToStorage(proposals);
+    resetProposalForm();
+    refreshAdminData();
+    renderManageTable();
+    renderProposals();
+    switchAdminTab('tabManage', document.querySelector('[data-tab="tabManage"]'));
+    showToast('پروپوزل کامیابی سے ڈیٹا بیس میں محفوظ ہو گیا');
+  } catch(err) {
+    console.error('Save proposal fatal error:', err);
+    showToast('خرابی: ' + (err.message || 'پروپوزل محفوظ نہیں ہو سکا'));
+  } finally {
+    if(saveBtn){
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalBtnText;
+    }
   }
-
-  saveProposalsToStorage(proposals);
-  resetProposalForm();
-  refreshAdminData();
-  renderManageTable();
-  renderProposals();
-  switchAdminTab('tabManage', document.querySelector('[data-tab="tabManage"]'));
-  showToast(isOnline ? 'پروپوزل کامیابی سے کلاؤڈ میں محفوظ ہو گیا' : 'پروپوزل محفوظ ہو گیا (لوکل ڈیٹا بیس)');
 });
 
 function showToast(msg){
