@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="format-detection" content="telephone=yes">
 
-<title>میراہمسفر | رشتہ بیورو پاکستان | شادی کے رشتے اور Marriage Bureau</title>
+<title>میراہمسفر | رشتہ بیورو پاکستان | Marriage Bureau</title>
 <meta name="description" content="میراہمسفر پاکستان کا رشتہ بیورو ہے۔ اعتماد، رازداری اور خاندانی اقدار کے ساتھ شادی کے مناسب رشتے تلاش کریں۔ لاہور، گوجرانوالہ، سیالکوٹ، گجرات، اسلام آباد، راولپنڈی، فیصل آباد، ملتان، پشاور اور کراچی سمیت پاکستان بھر میں رشتے۔">
 <meta name="keywords" content="میراہمسفر, میرا ہمسفر, ہمسفر رشتہ, رشتہ بیورو, رشتہ بیورو پاکستان, شادی کے رشتے, پاکستان میں رشتے, مناسب رشتہ, رشتہ کروانے والا, Marriage Bureau Pakistan, Marriage Bureau in Pakistan, Rishta Bureau Pakistan, Rishta in Pakistan, Pakistani Marriage Bureau, Muslim Marriage Bureau Pakistan, Matrimonial Services Pakistan, Marriage Proposals Pakistan, شادی کے لیے رشتے, لڑکے کے رشتے, لڑکی کے رشتے, لاہور رشتہ بیورو, گوجرانوالہ رشتہ بیورو, سیالکوٹ رشتہ بیورو, گجرات رشتہ بیورو, اسلام آباد رشتہ بیورو, راولپنڈی رشتہ بیورو, فیصل آباد رشتہ بیورو, ملتان رشتہ بیورو, کراچی رشتہ بیورو, پشاور رشتہ بیورو">
 <meta name="author" content="میراہمسفر">
@@ -58,7 +58,7 @@
   "@type": "LocalBusiness",
   "@id": "https://www.merahamsafar.org/#business",
   "name": "میراہمسفر",
-  "alternateName": ["Mera Humsafar", "MeraHumsafar", "Humsafar Rishta"],
+  "alternateName": ["Mera Hamsafar", "MeraHamsafar", "Hamsafar Rishta"],
   "url": "https://www.merahamsafar.org/",
   "logo": "https://www.merahamsafar.org/logo.jpg",
   "image": "https://www.merahamsafar.org/logo.jpg",
@@ -99,7 +99,8 @@
   "@id": "https://www.merahamsafar.org/#website",
   "url": "https://www.merahamsafar.org/",
   "name": "میراہمسفر",
-  "alternateName": "Mera Humsafar",
+  "alternateName": "Mera Hamsafar",
+  "description": "پاکستان میں اعتماد، رازداری اور خاندانی اقدار کے ساتھ مناسب شادی کے رشتے تلاش کرنے کے لیے میراہمسفر رشتہ بیورو۔",
   "inLanguage": "ur-PK",
   "publisher": {"@id":"https://www.merahamsafar.org/#business"}
 }
@@ -372,96 +373,6 @@ input,select,textarea{ font-family:var(--font-naskh); }
   display:flex; align-items:center; justify-content:center;
 }
 
-/* ===== coordinators ===== */
-.coordinators-row{
-  display:grid;
-  grid-template-columns:repeat(5, minmax(0, 1fr));
-  gap:16px;
-  align-items:stretch;
-}
-@media (max-width:960px){
-  .coordinators-row{
-    display:flex;
-    overflow-x:auto;
-    gap:14px;
-    padding-bottom:14px;
-    scroll-snap-type:x mandatory;
-    -webkit-overflow-scrolling:touch;
-  }
-  .coordinators-row > *{
-    flex:0 0 190px;
-    min-width:190px;
-    scroll-snap-align:start;
-  }
-}
-.coordinator-card{
-  background:#fff;
-  border:1px solid rgba(201,162,39,.32);
-  border-radius:18px;
-  padding:22px 14px 18px;
-  text-align:center;
-  box-shadow:0 8px 24px rgba(107,23,52,.06);
-  transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:space-between;
-  height:100%;
-  position:relative;
-  overflow:hidden;
-}
-.coordinator-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 18px 36px rgba(107,23,52,.14);
-  border-color:var(--gold);
-}
-.coordinator-card::before{
-  content:''; position:absolute; top:0; right:0; width:36px; height:36px;
-  background:linear-gradient(135deg, transparent 50%, rgba(201,162,39,.22) 50%);
-  border-radius:0 18px 0 0;
-}
-.coordinator-avatar-wrap{
-  width:74px; height:74px; border-radius:50%;
-  border:2px solid var(--gold); padding:4px; margin:0 auto 12px;
-  background:radial-gradient(circle at 30% 20%, var(--rose), var(--cream) 70%);
-  box-shadow:0 6px 16px rgba(107,23,52,.12);
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0;
-}
-.coordinator-avatar{
-  width:100%; height:100%; border-radius:50%; overflow:hidden;
-  display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
-  color:var(--gold-light);
-}
-.coordinator-avatar img{
-  width:100%; height:100%; object-fit:cover; border-radius:50%;
-}
-.coordinator-badge{
-  font-family:var(--font-ui); font-size:.70rem; letter-spacing:.5px;
-  color:var(--gold); background:var(--maroon-dark);
-  padding:3px 10px; border-radius:999px; display:inline-block; margin-bottom:8px;
-}
-.coordinator-name{
-  font-weight:700; color:var(--maroon-dark); font-size:1.05rem; margin-bottom:2px;
-}
-.coordinator-city{
-  font-size:.86rem; color:var(--maroon); font-weight:600; margin-bottom:4px;
-}
-.coordinator-role{
-  font-size:.78rem; color:#8a7275; margin-bottom:14px;
-}
-.coordinator-btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:6px;
-  width:100%; padding:7px 12px; border-radius:10px;
-  border:1.5px solid var(--maroon); color:var(--maroon);
-  font-size:.82rem; font-weight:600; background:transparent;
-  transition:all .25s ease; text-decoration:none;
-}
-.coordinator-btn:hover{
-  background:var(--maroon); color:#fff; border-color:var(--maroon);
-  box-shadow:0 4px 12px rgba(107,23,52,.2);
-}
 
 
 /* ===== proposals ===== */
@@ -1080,7 +991,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
           
           </div>
         </div>
-        <p style="margin-top:6px; opacity:.85;">رشتے جو دلوں کو جوڑیں — پاکستان میں بااعتماد شادی اور میچ میکنگ سروس</p>
+        <p style="margin-top:6px; opacity:.85;">رشتے جو دلوں کو جوڑیں۔ </p>
         <div class="flex gap-3 mt-6">
           <a href="#" class="social-ic" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="#E8C7CF"><path d="M13 22v-9h3l1-4h-4V6.5C13 5.4 13.4 4.6 15 4.6h2V1.1C16.6 1 15.4 1 14 1 10.9 1 9 3 9 6.1V9H6v4h3v9z"/></svg></a>
           <a href="#" class="social-ic" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8C7CF" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
@@ -1098,7 +1009,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
         </div>
       </div>
       <div>
-        <h4 style="color:var(--gold-light); font-weight:700; margin-bottom:14px;">رابطہ</h4>
+        <h4 style="color:var(--gold-light); font-weight:700; margin-bottom:14px;">Contact</h4>
         <p id="footerPhone" class=" footer-link" style="margin-bottom:8px;"></p>
         <p id="footerEmail" class=" footer-link"></p>
       </div>
@@ -1199,7 +1110,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
             </div>
             <div class="a-field">
               <label>جنس</label>
-              <select id="pGender"><option value="مرد">مرد (لڑکا)</option><option value="خاتون">خاتون (لڑکی)</option></select>
+              <select id="pGender"><option value="مرد">مرد (لڑکا)</option><option value="خواتین">خاتون (لڑکی)</option></select>
             </div>
             <div class="a-field">
               <label>عمر / تاریخ پیدائش</label>
@@ -1250,11 +1161,10 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
                     <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="3" style="width:auto;"> 3</label>
                     <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="4" style="width:auto;"> 4</label>
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div>
                     <label>شادی شدہ
                       <input type="number" data-sibling-married min="0" max="4" value="0" class="eng">
                     </label>
-                  
                   </div>
                 </fieldset>
                 <fieldset class="rounded-xl border border-[#e4d9c6] p-4" data-sibling-group="sisters">
@@ -1267,11 +1177,11 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
                     <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="3" style="width:auto;"> 3</label>
                     <label class="flex items-center gap-2"><input type="checkbox" data-sibling-count="4" style="width:auto;"> 4</label>
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
+                  <div>
                     <label>شادی شدہ
                       <input type="number" data-sibling-married min="0" max="4" value="0" class="eng">
                     </label>
-                  
+                  </div>
                 </fieldset>
               </div>
             </div>
@@ -2065,7 +1975,8 @@ function readSiblingGroup(group){
   const selected = fieldset.querySelector('[data-sibling-count]:checked');
   const total = selected ? Number(selected.dataset.siblingCount) : 0;
   const married = Number(fieldset.querySelector('[data-sibling-married]')?.value || 0);
-  const unmarried = Number(fieldset.querySelector('[data-sibling-unmarried]')?.value || 0);
+  const unmarriedInput = fieldset.querySelector('[data-sibling-unmarried]');
+  const unmarried = unmarriedInput ? Number(unmarriedInput.value || 0) : Math.max(0, total - married);
   return { total, married, unmarried };
 }
 
@@ -2080,7 +1991,10 @@ function setSiblingGroup(group, values){
     input.checked = Number(input.dataset.siblingCount) === total;
   });
   const mInput = fieldset.querySelector('[data-sibling-married]');
-  if(mInput) mInput.value = married;
+  if(mInput){
+    mInput.max = Math.max(4, total);
+    mInput.value = married;
+  }
   const uInput = fieldset.querySelector('[data-sibling-unmarried]');
   if(uInput) uInput.value = unmarried;
 }
