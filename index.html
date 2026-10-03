@@ -623,9 +623,13 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
 .badge{ padding:4px 12px; border-radius:999px; font-size:.75rem; font-weight:600; font-family:var(--font-ui); }
 .badge-active{ background:#E1F2E5; color:#1D7A3B; }
 .badge-hidden{ background:#F3E4E4; color:#A13636; }
+.action-btn{ border:1px solid rgba(107,23,52,.18); border-radius:8px; padding:6px 10px; font-size:.72rem; font-weight:700; cursor:pointer; transition:all .2s ease; background:#fff; color:var(--maroon-dark); }
+.action-btn:hover{ transform:translateY(-1px); }
+.action-btn.primary{ background:var(--maroon-dark); border-color:var(--maroon-dark); color:var(--cream); }
+.action-btn.warn{ border-color:rgba(201,162,39,.5); background:var(--gold-pale); color:var(--maroon-dark); }
+.action-btn.danger{ border-color:#d8a0a0; background:#fff3f3; color:#8d2d2d; }
 .icon-btn{ width:32px; height:32px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; transition:background .2s ease; }
-.icon-btn:hover{ background:var(--gold-pale); }
-.toast{
+.icon-btn:hover{ background:var(--gold-pale); }.toast{
   position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); z-index:200;
   background:var(--maroon-dark); color:var(--cream); padding:14px 26px; border-radius:12px;
   box-shadow:0 14px 30px rgba(0,0,0,.3); opacity:0; pointer-events:none; transition:all .35s ease;
@@ -776,10 +780,10 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
          <strong></strong>السلام علیکم!<strong>
 
 محترم والدین "میرا ہمسفر" رکن جماعت اسلامی محمد ارشد خلجی قیم جماعت اسلامی زون پی پی 62 گوجرانوالہ کی زیر صدارت بنیادی طور جماعت اسلامی کے تحریکی رشتوں کی سہولت کے لیئے 2016 میں گوجرانوالہ میں بطور ایک رشتہ گروپ ایکٹو کیا گیا۔ جو 6 ستمبر 2026 تک یعنی اسی سال ماہ ستمبر تک بلکل فری سروسز دیتا رہا ہے۔اس  میں پہلے پہل صرف تحریر کے حوالے سے اس قدر مشکلات اور مسائل ہیں کہ جس کا کوئی حساب نہیں۔ لوگ عمر۔ تعلیم۔ گھر اور کاروبار کے بارے میں بہت زیادہ غلط بیانی سے کام لیتے ہيں۔بعداذاں پورے پاکستان سے لوگ اس گروپ ميں شامل ہوتے گئے۔
-چند ہي سالوں ميں "ميرا ہمسفر" پاکستان بھر ميں ايک قابل اعتماد رشتہ گروپ کے طور پر نمائياں ہوگيا۔ لياكن ابھي بھي يه ايک وٹس ايمپ كا گروپ تھا۔ جس كي رياچ اور ايكسيس بھت تھوڑي تھي۔ جبکه شادي كا معامله تو پوری دنيا  انسانوں كا مشترك مسئلہ هے۔
+چند ہي سالوں ميں "ميرا ہمسفر" پاکستان بھر ميں ايک قابل اعتماد رشتہ گروپ کے طور پر نمائياں ہوگيا۔ لياكن ابھي بھي يه ايک وٹس ايمپ كا گروپ تھا۔ جس كي ريچ اور ايكسيس بھت تھوڑي تھي۔ جبکه شادي كا معامله تو پوری دنيا  انسانوں كا مشترك مسئلہ هے۔
 اس پر مشاورت كے بعد طے كيا گيا كه اب گوگل پر  باقاعدہ ايك ايپ لانچ كي جائے جو دنيا بھر سے رشتوں بلخصوص تحريركي فيمليز كیلئي بااعتماد اور باعزت طريقي سے سهولت فراهم كرے۔ اس كو گوگل پر لانچ كرديا گيا هے۔
 اس ایپ کی مدد سے آپ دنیا سے کہیں سے بھی رابطہ کرسکتے ہیں۔ اپنی پروفائل بھیج سکتے ہیں اور گوگل پر اپ لوڈ ہوسکتے ہیں۔۔
-  "میرا ہمسفر" کی انتظامیہ جماعت اسلامی کے ارکان پر مشتمل ہے۔ جو باقی تحریر کی ذمہ داریاں بھی ادا کررہے ہیں۔
+  "میرا ہمسفر" کی انتظامیہ جماعت اسلامی کے ارکان پر مشتمل ہے۔ جو باقی تحریک کی ذمہ داریاں بھی ادا کررہے ہیں۔
 ہم تمام معزز ممبرز کی جانب سے مثبت آراء کو خوش آمدید بھی کہیں گے اور جہاں مناسب ہوا تبدیلی بھی کریں گے۔ 
           "</p>
         <p style="font-size: .92rem; margin-top:14px; color:var(--maroon); font-weight:600;">محمد ارشد خلجی (قیم جماعت اسلامی کھیالی گوجرانوالہ پی پی 62)</p>
@@ -933,7 +937,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
 <section id="faq" class="py-24">
   <div class="wrap max-w-3xl">
     <div class="text-center mb-14 reveal">
-      <p class="sec-label eng">FAQs</p>
+      <p class="sec-label eng">FAQ's</p>
       <h2 class="sec-heading" style="margin-top:10px;">اکثر پوچھے جانے والے سوالات</h2>
       <div class="divider"><span class="dot"></span></div>
     </div>
@@ -956,7 +960,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
         <span style="color:#fff;">تمام رشتے</span>
       </div>
       <button onclick="showHomeView()" class="btn btn-outline btn-sm" style="border-color:var(--gold); color:var(--gold-light); padding:6px 16px; font-size:.82rem;">
-        ← واپس ہوم پیج
+        ←RETURN TO HOME
       </button>
     </div>
   </div>
@@ -977,6 +981,20 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
   <!-- Proposals Search & Grid Section -->
   <section class="py-16" style="background:var(--cream); min-height:60vh;">
     <div class="wrap">
+      <datalist id="cityOptions">
+        <option value="لاہور"></option>
+        <option value="گوجرانوالہ"></option>
+        <option value="سیالکوٹ"></option>
+        <option value="گجرات"></option>
+        <option value="اسلام آباد"></option>
+        <option value="راولپنڈی"></option>
+        <option value="فیصل آباد"></option>
+        <option value="ملتان"></option>
+        <option value="پشاور"></option>
+        <option value="کراچی"></option>
+        <option value="دیگر"></option>
+      </datalist>
+
       <!-- Filters Bar -->
       <div class="filter-bar mb-10">
         <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
@@ -990,12 +1008,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
           </div>
           <div>
             <label class="f-label">شہر</label>
-            <select id="fCity" class="f-input">
-              <option value="">تمام شہر</option>
-              <option>لاہور</option><option>گوجرانوالہ</option><option>سیالکوٹ</option><option>گجرات</option>
-              <option>اسلام آباد</option><option>راولپنڈی</option><option>فیصل آباد</option><option>ملتان</option>
-              <option>پشاور</option><option>کراچی</option><option>دیگر</option>
-            </select>
+            <input id="fCity" class="f-input" list="cityOptions" placeholder="شہر منتخب کریں یا لکھیں" value="">
           </div>
           <div>
             <label class="f-label">کم از کم عمر</label>
@@ -1014,15 +1027,19 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
             <input type="text" id="fProfession" class="f-input" placeholder="مثلاً: انجینئر">
           </div>
           <div>
+            <label class="f-label">قوم / برادری</label>
+            <input type="text" id="fEthnicity" class="f-input" placeholder="مثلاً: راجپوت، آرائیں">
+          </div>
+          <div>
             <label class="f-label">ازدواجی حیثیت</label>
             <select id="fMarital" class="f-input">
               <option value="">تمام</option>
-              <option>غیر شادی شدہ</option><option>مطلقہ</option><option>بیوہ / مرد</option>
+              <option>غیر شادی شدہ</option><option>مطلقہ</option><option>بیوہ / بیوہ مرد</option><option>دوسری شادی</option>
             </select>
           </div>
-          <div class="flex items-end gap-3">
-            <button id="btnSearch" class="btn btn-fill btn-sm w-full">تلاش کریں</button>
-            <button id="btnClear" class="btn btn-outline btn-sm w-full">صاف کریں</button>
+          <div class="sm:col-span-2 md:col-span-4 flex items-center justify-end gap-3 mt-2">
+            <button id="btnClear" class="btn btn-outline btn-sm" style="min-width:140px;">صاف کریں</button>
+            <button id="btnSearch" class="btn btn-fill btn-sm" style="min-width:140px;">تلاش کریں</button>
           </div>
         </div>
       </div>
@@ -1088,7 +1105,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
     </div>
     <div style="border-top:1px solid rgba(201,162,39,.25); padding-top:22px;" class="flex flex-col md:flex-row items-center justify-between gap-4">
       <p style="font-size:.85rem; opacity:.8;">© 2026 ہمسفر رشتہ — تمام حقوق بحق محفوظ ہیں</p>
-      <p style="font-style: italic ; font-size:.85rem; opacity:.8;">Developed by Shah Meer Khilji</p>
+      <p style="font-style: italic ; font-size:.85rem; opacity:.8;">Developed by Khilji Webtechs</p>
      
   </div>
 </footer>
@@ -1137,7 +1154,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
         <button type="submit" class="btn btn-fill w-full">LOG IN</button>
         <button type="button" onclick="hideAdmin()" class="btn btn-outline w-full mt-3">Return to Website</button>
       </form>
-      <p class="eng" style="font-size:.7rem; color:#b3a69a; margin-top:16px; text-align:center; line-height:1.6;"></p>
+      <p class="eng" style="font-size:.7rem; color:#b3a69a; margin-top:16px; text-align:center; line-height:1.6;">Developed by Khilji Webtechs</p>
     </div>
   </div>
 
@@ -1182,52 +1199,43 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
             </div>
             <div class="a-field">
               <label>جنس</label>
-              <select id="pGender" required><option value="مرد">مرد</option><option value="خواتین">خواتین</option></select>
+              <select id="pGender"><option value="مرد">مرد (لڑکا)</option><option value="خواتین">خاتون (لڑکی)</option></select>
             </div>
             <div class="a-field">
-              <label>عمر</label>
-              <input type="text" id="pAge" class="eng" required>
+              <label>عمر / تاریخ پیدائش</label>
+              <input type="text" id="pAge" class="eng" placeholder="مثلاً: 25 یا 1998">
             </div>
             <div class="a-field">
-              <label>شہر</label>
-              <select id="pCity" required>
-                <option>لاہور</option><option>گوجرانوالہ</option><option>سیالکوٹ</option><option>گجرات</option>
-                <option>اسلام آباد</option><option>راولپنڈی</option><option>فیصل آباد</option><option>ملتان</option>
-                <option>کراچی</option><option>دیگر</option>
-              </select>
+              <label>قوم / برادری</label>
+              <input type="text" id="pEthnicity" placeholder="مثلاً: راجپوت، آرائیں، مغل، بٹ...">
             </div>
-            <div class="a-field">
-              <label>تعلیم</label>
-              <input type="text" id="pEducation" required>
-            </div>
-            <div class="a-field">
-            <label>قوم</label>
-            <input type="text" id="pEthnicity" required>
-              <label>پیشہ</label>
-              <input type="text" id="pProfession" required>
-            </div>
-            <div class="a-field">
+             <div class="a-field">
               <label>قد</label>
               <input type="text" id="pHeight" placeholder="مثلاً: 5'6&quot;" class="eng">
             </div>
+            
             <div class="a-field">
-              <label>ازدواجی حیثیت</label>
-              <select id="pMarital"><option>غیر شادی شدہ</option><option>مطلقہ</option><option>بیوہ / بیوہ مرد</option><option>دوسری شادی</option></select>
+              <label>مذہب / مسلک (اختیاری)</label>
+              <select id="pReligionSelect" class="a-field-input eng">
+                <option value="">-- منتخب کریں (اختیاری) --</option>
+                <option value="Sunni">اہل سنت (Sunni)</option>
+                <option value="Sunni(Nazar/Nayyaz)">اہل سنت نیاز والے (Sunni Nazar/Niaz)</option>
+                <option value="Barelvi">بریلوی (Barelvi)</option>
+                <option value="Deobandi">دیوبندی (Deobandi)</option>
+                <option value="Ahle Hadith">اہل حدیث (Ahle Hadith)</option>
+                <option value="Shia">اہل تشیع (Shia)</option>
+                <option value="Ismaili">اسماعیلی (Ismaili)</option>
+                <option value="دیگر">دیگر</option>
+              </select>
+              <div id="pReligionWrap" class="mt-2"><input type="text" id="pReligion" placeholder="اگر کوئی مخصوص مسلک لکھنا ہو"></div>
             </div>
             <div class="a-field">
-              <label class="flex items-center gap-2"><input type="checkbox" id="pReligionToggle" style="width:auto;" onchange="document.getElementById('pReligionWrap').classList.toggle('hidden', !this.checked)"> مسلکہ شامل کریں (اختیاری)</label>
-              <select id="pReligionSelect" class="a-field-input eng">
-                <option value="">-- منتخب کریں --</option>
-                <option>NA</option>
-                <option>Sunni</option>
-                <option>Sunni(Nazar/Nayyaz)</option>
-                <option>Shia</option>
-                <option>Deobandi</option>
-                <option>Barelvi</option>
-                <option>Ahle Hadith</option>
-                <option>Ismaili</option>
-              </select>
-              <div id="pReligionWrap" class="hidden mt-2"><input type="text" id="pReligion"></div>
+              <label>تعلیم</label>
+              <input type="text" id="pEducation">
+            </div>
+             <div class="a-field">
+              <label>پیشہ</label>
+              <input type="text" id="pProfession" placeholder="مثلاً: بزنس، انجینئر، جاب...">
             </div>
             <div class="a-field sm:col-span-2">
               <label>بہن بھائی</label>
@@ -1265,17 +1273,23 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
                     <label>شادی شدہ
                       <input type="number" data-sibling-married min="0" max="4" value="0" class="eng">
                     </label>
-                    <label>غیر شادی شدہ
-                      <input type="number" data-sibling-unmarried min="0" max="4" value="0" class="eng">
-                    </label>
-                  </div>
+                  
                 </fieldset>
               </div>
             </div>
             <div class="a-field">
-              <label>پروفائل تصویر</label>
-              <input type="file" id="pImage" accept="image/*" class="eng">
+              <label>شہر</label>
+              <input id="pCity" class="a-field-input" list="cityOptions" placeholder="شہر منتخب کریں یا لکھیں">
             </div>
+           
+           
+            <div class="a-field">
+              <label>ازدواجی حیثیت</label>
+              <select id="pMarital"><option>غیر شادی شدہ</option><option>مطلقہ</option><option>بیوہ / بیوہ مرد</option><option>دوسری شادی</option></select>
+            </div>
+            
+            
+         
             <div class="a-field sm:col-span-2">
               <label>خاندانی پس منظر</label>
               <textarea id="pFamily" rows="2"></textarea>
@@ -1477,27 +1491,123 @@ revealEls.forEach(el=>io.observe(el));
    PROPOSALS RENDER + FILTER
    ========================================================= */
 function avatarSvg(gender){
-  const cls = gender === 'مرد' ? 'avatar-m' : 'avatar-f';
+  const isM = gender === 'مرد' || gender === 'لڑکا';
+  const cls = isM ? 'avatar-m' : 'avatar-f';
   return `<div class="avatar-ring ${cls}"><svg width="34" height="34" viewBox="0 0 24 24" fill="#FFF9F0"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>`;
 }
 
+function formatAgeDisplay(age){
+  if(!age) return '—';
+  const s = String(age).trim();
+  if(/^\d{1,2}$/.test(s)) return `${s} سال`;
+  return s;
+}
+
+function extractAgeNum(ageVal){
+  if(!ageVal) return null;
+  const s = String(ageVal).trim();
+  const m = s.match(/\b(19\d{2}|20\d{2})\b/);
+  if(m){
+    return new Date().getFullYear() - parseInt(m[1], 10);
+  }
+  const n = parseInt(s, 10);
+  return isNaN(n) ? null : n;
+}
+
+function formatSiblingsDisplay(siblings, siblingsDetails){
+  if(!siblings && !siblingsDetails) return '';
+  let data = null;
+  if(typeof siblings === 'object' && siblings !== null){
+    data = siblings;
+  } else if(typeof siblings === 'string' && siblings.trim()){
+    try { data = JSON.parse(siblings); } catch(e){}
+  }
+  if(data && (data.brothers || data.sisters)){
+    const b = data.brothers || {};
+    const s = data.sisters || {};
+    const bTot = Number(b.total) || 0;
+    const bM = Number(b.married) || 0;
+    const bU = Number(b.unmarried) || 0;
+    const sTot = Number(s.total) || 0;
+    const sM = Number(s.married) || 0;
+    const sU = Number(s.unmarried) || 0;
+
+    if(bTot === 0 && sTot === 0) return 'کوئی بھائی بہن نہیں';
+
+    const parts = [];
+    if(bTot > 0){
+      let bText = `${bTot} بھائی`;
+      const bDetails = [];
+      if(bM > 0) bDetails.push(`${bM} شادی شدہ`);
+      if(bU > 0) bDetails.push(`${bU} غیر شادی شدہ`);
+      if(bDetails.length > 0) bText += ` (${bDetails.join('، ')})`;
+      parts.push(bText);
+    }
+    if(sTot > 0){
+      let sText = sTot === 1 ? '1 بہن' : `${sTot} بہنیں`;
+      const sDetails = [];
+      if(sM > 0) sDetails.push(`${sM} شادی شدہ`);
+      if(sU > 0) sDetails.push(`${sU} غیر شادی شدہ`);
+      if(sDetails.length > 0) sText += ` (${sDetails.join('، ')})`;
+      parts.push(sText);
+    }
+    if(parts.length > 0) return parts.join(' • ');
+  }
+  if(siblingsDetails && typeof siblingsDetails === 'string' && siblingsDetails.trim()){
+    return siblingsDetails
+      .replace(/Brothers:\s*(\d+)\s*married,\s*(\d+)\s*unmarried;\s*Sisters:\s*(\d+)\s*married,\s*(\d+)\s*unmarried/i, (m, bm, bu, sm, su) => {
+        const parts = [];
+        const bTot = (+bm) + (+bu);
+        const sTot = (+sm) + (+su);
+        if(bTot > 0){
+          let t = `${bTot} بھائی`;
+          const d = [];
+          if(+bm > 0) d.push(`${bm} شادی شدہ`);
+          if(+bu > 0) d.push(`${bu} غیر شادی شدہ`);
+          if(d.length) t += ` (${d.join('، ')})`;
+          parts.push(t);
+        }
+        if(sTot > 0){
+          let t = sTot === 1 ? '1 بہن' : `${sTot} بہنیں`;
+          const d = [];
+          if(+sm > 0) d.push(`${sm} شادی شدہ`);
+          if(+su > 0) d.push(`${su} غیر شادی شدہ`);
+          if(d.length) t += ` (${d.join('، ')})`;
+          parts.push(t);
+        }
+        return parts.length ? parts.join(' • ') : 'کوئی بھائی بہن نہیں';
+      });
+  }
+  return '';
+}
+
 function proposalCard(p){
+  const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details);
+  const ageDisplay = formatAgeDisplay(p.age);
+  const bio = (p.family_background || p.about || '').trim();
+  const genderLabel = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'خواتین';
+
   return `
-  <div class="proposal-card reveal in p-6">
-    <div class="flex items-center gap-4 mb-4">
-      ${avatarSvg(p.gender)}
-      <div>
-        <span class="pid-badge">${p.proposal_id}</span>
-        <div style="font-weight:700; margin-top:6px;">${p.gender} • <span class="eng">${p.age}</span> سال</div>
+  <div class="proposal-card reveal in p-6 flex flex-col justify-between">
+    <div>
+      <div class="flex items-center gap-4 mb-4">
+        ${avatarSvg(p.gender)}
+        <div>
+          <span class="pid-badge">${p.proposal_id}</span>
+          <div style="font-weight:700; margin-top:6px;">${genderLabel} • <span class="eng">${ageDisplay}</span></div>
+        </div>
       </div>
+      <div class="info-row"><span>شہر</span><span>${p.city || '—'}</span></div>
+      ${p.ethnicity ? `<div class="info-row"><span>قوم / برادری</span><span style="color:var(--maroon-dark); font-weight:700;">${p.ethnicity}</span></div>` : ''}
+      ${p.religion ? `<div class="info-row"><span>مذہب / مسلک</span><span>${p.religion}</span></div>` : ''}
+      <div class="info-row"><span>تعلیم</span><span>${p.education || '—'}</span></div>
+      <div class="info-row"><span>پیشہ</span><span>${p.profession || '—'}</span></div>
+      <div class="info-row"><span>ازدواجی حیثیت</span><span>${p.marital_status || '—'}</span></div>
+      <div class="info-row"><span>قد</span><span class="eng">${p.height || '—'}</span></div>
+      ${sibText ? `<div class="info-row"><span>بہن بھائی</span><span style="font-size:0.83rem;">${sibText}</span></div>` : ''}
+      ${bio ? `<p style="font-size:.86rem; color:#8a7275; margin-top:10px; line-height:1.5;">${bio.slice(0,85)}${bio.length > 85 ? '…' : ''}</p>` : ''}
     </div>
-    <div class="info-row"><span>شہر</span><span>${p.city}</span></div>
-    <div class="info-row"><span>تعلیم</span><span>${p.education}</span></div>
-    <div class="info-row"><span>پیشہ</span><span>${p.profession}</span></div>
-    <div class="info-row"><span>ازدواجی حیثیت</span><span>${p.marital_status}</span></div>
-    <div class="info-row" style="border-bottom:none;"><span>قد</span><span class="eng">${p.height || '—'}</span></div>
-    <p style="font-size:.86rem; color:#8a7275; margin-top:10px; min-height:44px;">${(p.family_background||'').slice(0,90)}${(p.family_background||'').length>90?'…':''}</p>
-    <div class="mt-4">
+    <div class="mt-4 pt-2">
       <button onclick="openModal('${p.id || p.proposal_id}')" class="btn btn-outline btn-sm w-full">مزید تفصیلات</button>
     </div>
   </div>`;
@@ -1505,13 +1615,14 @@ function proposalCard(p){
 
 function getFilters(){
   return {
-    gender: document.getElementById('fGender').value,
-    city: document.getElementById('fCity').value,
-    ageMin: parseInt(document.getElementById('fAgeMin').value) || null,
-    ageMax: parseInt(document.getElementById('fAgeMax').value) || null,
-    education: (document.getElementById('fEducation').value || '').trim(),
-    profession: (document.getElementById('fProfession').value || '').trim(),
-    marital: document.getElementById('fMarital').value
+    gender: (document.getElementById('fGender')?.value || '').trim(),
+    city: (document.getElementById('fCity')?.value || '').trim(),
+    ethnicity: (document.getElementById('fEthnicity')?.value || '').trim(),
+    ageMin: parseInt(document.getElementById('fAgeMin')?.value) || null,
+    ageMax: parseInt(document.getElementById('fAgeMax')?.value) || null,
+    education: (document.getElementById('fEducation')?.value || '').trim(),
+    profession: (document.getElementById('fProfession')?.value || '').trim(),
+    marital: (document.getElementById('fMarital')?.value || '').trim()
   };
 }
 
@@ -1520,15 +1631,28 @@ function renderProposals(){
   const grid = document.getElementById('proposalGrid');
   const visible = proposals.filter(p=>{
     if(p.status !== 'Active') return false;
-    if(f.gender && p.gender !== f.gender) return false;
+
+    if(f.gender){
+      const pIsMale = p.gender === 'مرد' || p.gender === 'لڑکا';
+      const fIsMale = f.gender === 'مرد' || f.gender === 'لڑکا';
+      if(pIsMale !== fIsMale) return false;
+    }
+
     if(f.city && p.city !== f.city) return false;
-    if(f.ageMin && p.age < f.ageMin) return false;
-    if(f.ageMax && p.age > f.ageMax) return false;
+
+    if(f.ethnicity && !(p.ethnicity || '').toLowerCase().includes(f.ethnicity.toLowerCase())) return false;
+
+    const ageNum = extractAgeNum(p.age);
+    if(f.ageMin && (ageNum === null || ageNum < f.ageMin)) return false;
+    if(f.ageMax && (ageNum === null || ageNum > f.ageMax)) return false;
+
     if(f.education && !(p.education || '').toLowerCase().includes(f.education.toLowerCase())) return false;
     if(f.profession && !(p.profession || '').toLowerCase().includes(f.profession.toLowerCase())) return false;
     if(f.marital && p.marital_status !== f.marital) return false;
+
     return true;
   });
+
   grid.innerHTML = visible.map(proposalCard).join('');
   const noRes = document.getElementById('noResults');
   if(noRes) noRes.classList.toggle('hidden', visible.length > 0);
@@ -1541,10 +1665,20 @@ renderProposals();
 
 document.getElementById('btnSearch').addEventListener('click', renderProposals);
 document.getElementById('btnClear').addEventListener('click', ()=>{
-  ['fGender','fCity','fAgeMin','fAgeMax','fEducation','fProfession','fMarital'].forEach(id=>document.getElementById(id).value='');
+  ['fGender','fCity','fEthnicity','fAgeMin','fAgeMax','fEducation','fProfession','fMarital'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
   renderProposals();
 });
-['fGender','fCity','fMarital'].forEach(id=>document.getElementById(id).addEventListener('change', renderProposals));
+['fGender','fCity','fMarital'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('change', renderProposals);
+});
+['fEthnicity','fEducation','fProfession'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', renderProposals);
+});
 
 /* =========================================================
    MODAL
@@ -1552,36 +1686,44 @@ document.getElementById('btnClear').addEventListener('click', ()=>{
 function openModal(id){
   const p = proposals.find(x=>String(x.id)===String(id) || String(x.proposal_id)===String(id));
   if(!p) return;
+  const ageDisplay = formatAgeDisplay(p.age);
+  const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details);
+
   document.getElementById('modalPid').textContent = p.proposal_id;
-  document.getElementById('modalTitle').textContent = `${p.gender} • ${p.age} سال • ${p.city}`;
+  document.getElementById('modalTitle').textContent = `${p.gender} • ${ageDisplay} • ${p.city || ''}`;
   document.getElementById('modalBody').innerHTML = `
     <div class="mb-6">
       <span class="modal-sec-title">ذاتی معلومات</span>
       <div class="grid grid-cols-2 gap-3 mt-2 text-sm">
         <div class="info-row"><span>جنس</span><span>${p.gender}</span></div>
-        <div class="info-row"><span>عمر</span><span class="eng">${p.age}</span></div>
-        <div class="info-row"><span>شہر</span><span>${p.city}</span></div>
-        <div class="info-row"><span>قد</span><span class="eng">${p.height||'—'}</span></div>
-        <div class="info-row"><span>ازدواجی حیثیت</span><span>${p.marital_status}</span></div>
-        ${p.religion ? `<div class="info-row"><span>مذہب/فرقہ</span><span>${p.religion}</span></div>` : ''}
+        <div class="info-row"><span>عمر / تاریخ پیدائش</span><span class="eng">${ageDisplay}</span></div>
+        <div class="info-row"><span>شہر</span><span>${p.city || '—'}</span></div>
+        <div class="info-row"><span>قوم / برادری</span><span style="color:var(--maroon-dark); font-weight:700;">${p.ethnicity || '—'}</span></div>
+        <div class="info-row"><span>قد</span><span class="eng">${p.height || '—'}</span></div>
+        <div class="info-row"><span>ازدواجی حیثیت</span><span>${p.marital_status || '—'}</span></div>
+        <div class="info-row"><span>مذہب / مسلک</span><span>${p.religion || '—'}</span></div>
       </div>
     </div>
     <div class="mb-6">
-      <span class="modal-sec-title">تعلیمی معلومات</span>
-      <p class="mt-2 text-sm">${p.education}</p>
+      <span class="modal-sec-title">تعلیمی و پیشہ ورانہ معلومات</span>
+      <div class="grid grid-cols-2 gap-3 mt-2 text-sm">
+        <div class="info-row"><span>تعلیم</span><span>${p.education || '—'}</span></div>
+        <div class="info-row"><span>پیشہ</span><span>${p.profession || '—'}</span></div>
+      </div>
     </div>
     <div class="mb-6">
-      <span class="modal-sec-title">پیشہ ورانہ معلومات</span>
-      <p class="mt-2 text-sm">${p.profession}</p>
+      <span class="modal-sec-title">خاندانی پس منظر و بہن بھائی</span>
+      ${sibText ? `<div class="info-row text-sm mb-3"><span>بہن بھائی</span><span>${sibText}</span></div>` : ''}
+      <p class="mt-2 text-sm leading-relaxed">${p.family_background || 'خاندانی تفصیل درج نہیں ہے۔'}</p>
     </div>
+    ${p.about ? `
     <div class="mb-6">
-      <span class="modal-sec-title">خاندانی معلومات</span>
-      <p class="mt-2 text-sm">${p.family_background || '—'}</p>
-      ${p.about ? `<p class="mt-2 text-sm" style="color:#8a7275;">${p.about}</p>` : ''}
-    </div>
+      <span class="modal-sec-title">امیدوار کے متعلق (About)</span>
+      <p class="mt-2 text-sm leading-relaxed" style="color:#5a4a4e;">${p.about}</p>
+    </div>` : ''}
     <div class="mb-6">
-      <span class="modal-sec-title">مطلوبہ رشتہ</span>
-      <p class="mt-2 text-sm">${p.looking_for || '—'}</p>
+      <span class="modal-sec-title">مطلوبہ رشتہ (خواہشات و ترجیحات)</span>
+      <p class="mt-2 text-sm leading-relaxed">${p.looking_for || '—'}</p>
     </div>
     <p class="privacy-note mb-5">رابطے کے لیے ہمسفر رشتہ سے رابطہ کریں</p>
     <a href="${waLink('السلام علیکم، مجھے پروپوزل ' + p.proposal_id + ' کے بارے میں مزید معلومات درکار ہیں۔')}" target="_blank" class="btn btn-fill w-full">اس رشتے کے بارے میں رابطہ کریں</a>
@@ -1635,15 +1777,20 @@ function toggleFaq(i){ document.getElementById('faqItem'+i).classList.toggle('op
    ADMIN PANEL
    ========================================================= */
 async function checkAdminSession(){
+  if(!sessionStorage.getItem('hrAdminAuthed')){
+    return false;
+  }
   try{
-    const response = await fetch(`${API_BASE}/api/admin/session`, {
+    const response = await fetch(`${API_BASE}/api/admin/session?t=${Date.now()}`, {
       credentials:'same-origin',
       cache:'no-store'
     });
-    if(!response.ok) return false;
+    if(!response.ok){
+      sessionStorage.removeItem('hrAdminAuthed');
+      return false;
+    }
     const data = await response.json();
     if(data.authenticated){
-      sessionStorage.setItem('hrAdminAuthed', 'true');
       return true;
     }
     sessionStorage.removeItem('hrAdminAuthed');
@@ -1712,6 +1859,12 @@ async function showAdmin(){
   document.getElementById('publicSite').style.display = 'none';
   document.getElementById('adminSite').style.display = 'block';
   document.getElementById('mobileBar').style.display = 'none';
+
+  // Strictly reset view to login screen first so dashboard never glitches or flashes
+  document.getElementById('adminLogin').classList.remove('hidden');
+  document.getElementById('adminDash').classList.add('hidden');
+  document.getElementById('loginError').classList.add('hidden');
+
   if(window.location.hash !== '#admin'){
     try{ history.pushState(null, '', '#admin'); }catch(e){ window.location.hash = 'admin'; }
   }
@@ -1725,12 +1878,17 @@ async function showAdmin(){
     document.getElementById('adminLogin').classList.remove('hidden');
     document.getElementById('adminDash').classList.add('hidden');
     document.getElementById('loginError').classList.add('hidden');
+    const input = document.getElementById('adminPass');
+    if(input){ input.value = ''; input.focus(); }
   }
   window.scrollTo(0,0);
 }
-function hideAdmin(){
+
+async function hideAdmin(){
+  await adminLogout();
   showHomeView();
 }
+
 async function tryAdminLogin(e){
   if(e && e.preventDefault) e.preventDefault();
   const input = document.getElementById('adminPass');
@@ -1753,7 +1911,9 @@ async function tryAdminLogin(e){
     });
 
     if(response.ok){
+      const resData = await response.json().catch(()=>({}));
       sessionStorage.setItem('hrAdminAuthed', 'true');
+      if(resData.token) sessionStorage.setItem('hrAdminToken', resData.token);
       input.value = '';
       document.getElementById('adminLogin').classList.add('hidden');
       document.getElementById('adminDash').classList.remove('hidden');
@@ -1787,9 +1947,12 @@ async function adminLogout(){
     });
   }catch(e){}
   sessionStorage.removeItem('hrAdminAuthed');
+  sessionStorage.removeItem('hrAdminToken');
   document.getElementById('adminDash').classList.add('hidden');
   document.getElementById('adminLogin').classList.remove('hidden');
-  document.getElementById('adminPass').value = '';
+  document.getElementById('loginError').classList.add('hidden');
+  const input = document.getElementById('adminPass');
+  if(input) input.value = '';
 }
 
 function switchAdminTab(tabId, btn){
@@ -1821,26 +1984,33 @@ function refreshAdminData(){
 
   const recent = [...proposals].sort((a,b)=> new Date(b.created_at) - new Date(a.created_at)).slice(0,6);
   document.getElementById('recentTable').innerHTML = `
-    <tr><th>آئی ڈی</th><th>جنس</th><th>عمر</th><th>شہر</th><th>سٹیٹس</th></tr>
+    <tr><th>آئی ڈی</th><th>جنس</th><th>عمر</th><th>شہر</th><th>قوم</th><th>سٹیٹس</th></tr>
     ${recent.map(p=>`<tr>
-      <td class="eng">${p.proposal_id}</td><td>${p.gender}</td><td class="eng">${p.age}</td><td>${p.city}</td>
+      <td class="eng">${p.proposal_id}</td><td>${p.gender}</td><td class="eng">${p.age}</td><td>${p.city || '—'}</td><td>${p.ethnicity || '—'}</td>
       <td><span class="badge ${p.status==='Active'?'badge-active':'badge-hidden'}">${p.status==='Active'?'فعال':'مخفی'}</span></td>
     </tr>`).join('')}
   `;
 }
 
 function renderManageTable(){
-  const q = (document.getElementById('manageSearch').value || '').toLowerCase();
-  const rows = proposals.filter(p=> !q || p.proposal_id.toLowerCase().includes(q) || p.city.toLowerCase().includes(q));
+  const q = (document.getElementById('manageSearch').value || '').toLowerCase().trim();
+  const rows = proposals.filter(p=> !q || 
+    (p.proposal_id || '').toLowerCase().includes(q) || 
+    (p.city || '').toLowerCase().includes(q) ||
+    (p.ethnicity || '').toLowerCase().includes(q) ||
+    (p.profession || '').toLowerCase().includes(q)
+  );
   document.getElementById('manageTable').innerHTML = `
-    <tr><th>آئی ڈی</th><th>جنس</th><th>عمر</th><th>شہر</th><th>سٹیٹس</th><th>اعمال</th></tr>
+    <tr><th>آئی ڈی</th><th>جنس</th><th>عمر</th><th>شہر</th><th>قوم</th><th>سٹیٹس</th><th>اعمال</th></tr>
     ${rows.map(p=>`<tr>
-      <td class="eng">${p.proposal_id}</td><td>${p.gender}</td><td class="eng">${p.age}</td><td>${p.city}</td>
+      <td class="eng">${p.proposal_id}</td><td>${p.gender}</td><td class="eng">${p.age}</td><td>${p.city || '—'}</td><td>${p.ethnicity || '—'}</td>
       <td><span class="badge ${p.status==='Active'?'badge-active':'badge-hidden'}">${p.status==='Active'?'فعال':'مخفی'}</span></td>
-      <td class="flex gap-1">
-        <button class="icon-btn" title="ترمیم" onclick="editProposal('${p.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-        <button class="icon-btn" title="${p.status==='Active'?'مخفی کریں':'فعال کریں'}" onclick="toggleStatus('${p.id}')">${p.status==='Active'?'hide':'show'}</button>
-        <button class="icon-btn" title="حذف کریں" onclick="deleteProposal('${p.id}')">🗑️</button>
+      <td>
+        <div class="flex flex-wrap gap-2">
+          <button class="action-btn primary" title="ترمیم" onclick="editProposal('${p.id || p.proposal_id}')">ترمیم</button>
+          <button class="action-btn warn" title="${p.status==='Active'?'مخفی کریں':'فعال کریں'}" onclick="toggleStatus('${p.id || p.proposal_id}')">${p.status==='Active'?'مخفی':'فعال'}</button>
+          <button class="action-btn danger" title="حذف کریں" onclick="deleteProposal('${p.id || p.proposal_id}')">حذف</button>
+        </div>
       </td>
     </tr>`).join('')}
   `;
@@ -1893,30 +2063,28 @@ function getNextProposalId(){
 
 function readSiblingGroup(group){
   const fieldset = document.querySelector(`[data-sibling-group="${group}"]`);
+  if(!fieldset) return { total: 0, married: 0, unmarried: 0 };
   const selected = fieldset.querySelector('[data-sibling-count]:checked');
-  if(!selected) return null;
-  return {
-    total: Number(selected.dataset.siblingCount),
-    married: Number(fieldset.querySelector('[data-sibling-married]').value),
-    unmarried: Number(fieldset.querySelector('[data-sibling-unmarried]').value)
-  };
+  const total = selected ? Number(selected.dataset.siblingCount) : 0;
+  const married = Number(fieldset.querySelector('[data-sibling-married]')?.value || 0);
+  const unmarried = Number(fieldset.querySelector('[data-sibling-unmarried]')?.value || 0);
+  return { total, married, unmarried };
 }
 
 function setSiblingGroup(group, values){
   const fieldset = document.querySelector(`[data-sibling-group="${group}"]`);
-  const total = Number(values?.total);
-  const married = Number(values?.married);
-  const unmarried = Number(values?.unmarried);
-  const valid = Number.isInteger(total) && total >= 0 && total <= 4 &&
-    Number.isInteger(married) && married >= 0 && married <= 4 &&
-    Number.isInteger(unmarried) && unmarried >= 0 && unmarried <= 4 &&
-    married + unmarried === total;
-  const selectedTotal = valid ? total : 0;
+  if(!fieldset) return;
+  const total = Number(values?.total) || 0;
+  const married = Number(values?.married) || 0;
+  const unmarried = Number(values?.unmarried) || 0;
+
   fieldset.querySelectorAll('[data-sibling-count]').forEach(input=>{
-    input.checked = Number(input.dataset.siblingCount) === selectedTotal;
+    input.checked = Number(input.dataset.siblingCount) === total;
   });
-  fieldset.querySelector('[data-sibling-married]').value = valid ? married : 0;
-  fieldset.querySelector('[data-sibling-unmarried]').value = valid ? unmarried : 0;
+  const mInput = fieldset.querySelector('[data-sibling-married]');
+  if(mInput) mInput.value = married;
+  const uInput = fieldset.querySelector('[data-sibling-unmarried]');
+  if(uInput) uInput.value = unmarried;
 }
 
 document.querySelectorAll('[data-sibling-group]').forEach(fieldset=>{
@@ -1938,8 +2106,15 @@ function editProposal(id){
   if(!p) return;
   document.getElementById('pInternalId').value = p.id || p.proposal_id;
   document.getElementById('pProposalId').value = p.proposal_id;
-  document.getElementById('pGender').value = p.gender;
-  document.getElementById('pAge').value = p.age;
+  document.getElementById('pGender').value = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'خواتین';
+  document.getElementById('pAge').value = p.age || '';
+  document.getElementById('pCity').value = p.city || 'لاہور';
+  document.getElementById('pEthnicity').value = p.ethnicity || '';
+  document.getElementById('pEducation').value = p.education || '';
+  document.getElementById('pProfession').value = p.profession || '';
+  document.getElementById('pHeight').value = p.height || '';
+  document.getElementById('pMarital').value = p.marital_status || 'غیر شادی شدہ';
+
   let siblingData = {};
   try {
     siblingData = JSON.parse(p.siblings || '{}');
@@ -1948,24 +2123,28 @@ function editProposal(id){
   }
   setSiblingGroup('brothers', siblingData.brothers);
   setSiblingGroup('sisters', siblingData.sisters);
-  document.getElementById('pCity').value = p.city;
-  document.getElementById('pEducation').value = p.education;
-  document.getElementById('pProfession').value = p.profession;
-  document.getElementById('pHeight').value = p.height || '';
-  document.getElementById('pMarital').value = p.marital_status;
-  if(p.religion){
-    document.getElementById('pReligionToggle').checked = true;
-    document.getElementById('pReligionWrap').classList.remove('hidden');
-    document.getElementById('pReligionSelect').value = p.religion;
-  } else {
-    document.getElementById('pReligionToggle').checked = false;
-    document.getElementById('pReligionWrap').classList.add('hidden');
-    document.getElementById('pReligionSelect').value = 'Sunni';
+
+  const rel = (p.religion || '').trim();
+  const relSel = document.getElementById('pReligionSelect');
+  const relInput = document.getElementById('pReligion');
+  if(relSel){
+    const hasOpt = Array.from(relSel.options).some(o => o.value === rel);
+    if(hasOpt){
+      relSel.value = rel;
+      if(relInput) relInput.value = '';
+    } else if(rel){
+      relSel.value = 'دیگر';
+      if(relInput) relInput.value = rel;
+    } else {
+      relSel.value = '';
+      if(relInput) relInput.value = '';
+    }
   }
+
   document.getElementById('pFamily').value = p.family_background || '';
   document.getElementById('pAbout').value = p.about || '';
   document.getElementById('pLookingFor').value = p.looking_for || '';
-  document.getElementById('pStatus').value = p.status;
+  document.getElementById('pStatus').value = p.status || 'Active';
   document.getElementById('addFormTitle').textContent = 'پروپوزل میں ترمیم کریں: ' + p.proposal_id;
   switchAdminTab('tabAdd', document.querySelector('[data-tab="tabAdd"]'));
 }
@@ -1974,7 +2153,11 @@ function resetProposalForm(){
   document.getElementById('proposalForm').reset();
   document.getElementById('pInternalId').value = '';
   document.getElementById('pProposalId').value = getNextProposalId();
-  document.getElementById('pReligionWrap').classList.add('hidden');
+  if(document.getElementById('pEthnicity')) document.getElementById('pEthnicity').value = '';
+  if(document.getElementById('pReligionSelect')) document.getElementById('pReligionSelect').value = '';
+  if(document.getElementById('pReligion')) document.getElementById('pReligion').value = '';
+  setSiblingGroup('brothers', { total: 0, married: 0, unmarried: 0 });
+  setSiblingGroup('sisters', { total: 0, married: 0, unmarried: 0 });
   document.getElementById('addFormTitle').textContent = 'نیا پروپوزل شامل کریں';
 }
 
@@ -2015,39 +2198,36 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
     return;
   }
 
+  let religionVal = (document.getElementById('pReligion')?.value || '').trim();
+  if(!religionVal){
+    religionVal = (document.getElementById('pReligionSelect')?.value || '').trim();
+    if(religionVal === 'NA' || religionVal === 'دیگر') religionVal = '';
+  }
+
+  const brothers = readSiblingGroup('brothers');
+  const sisters = readSiblingGroup('sisters');
+  const siblingsJson = JSON.stringify({brothers, sisters});
+  const siblingsDetails = formatSiblingsDisplay(siblingsJson);
+
   const data = {
     proposal_id: pid,
     gender: document.getElementById('pGender').value,
-    age: document.getElementById('pAge').value.trim(),
-    siblings: '',
-    siblings_details: '',
-    city: document.getElementById('pCity').value,
-    education: document.getElementById('pEducation').value.trim(),
-    profession: document.getElementById('pProfession').value.trim(),
-    height: document.getElementById('pHeight').value.trim(),
+    age: (document.getElementById('pAge').value || '').trim(),
+    city: (document.getElementById('pCity')?.value || '').trim(),
+    ethnicity: (document.getElementById('pEthnicity')?.value || '').trim(),
+    education: (document.getElementById('pEducation').value || '').trim(),
+    profession: (document.getElementById('pProfession').value || '').trim(),
+    height: (document.getElementById('pHeight').value || '').trim(),
     marital_status: document.getElementById('pMarital').value,
-    religion: document.getElementById('pReligionToggle').checked ? document.getElementById('pReligionSelect').value.trim() : '',
-    family_background: document.getElementById('pFamily').value.trim(),
-    about: document.getElementById('pAbout').value.trim(),
-    looking_for: document.getElementById('pLookingFor').value.trim(),
+    religion: religionVal,
+    siblings: siblingsJson,
+    siblings_details: siblingsDetails,
+    family_background: (document.getElementById('pFamily').value || '').trim(),
+    about: (document.getElementById('pAbout').value || '').trim(),
+    looking_for: (document.getElementById('pLookingFor').value || '').trim(),
     status: document.getElementById('pStatus').value,
     created_at: new Date().toISOString().slice(0, 10)
   };
-  const brothers = readSiblingGroup('brothers');
-  const sisters = readSiblingGroup('sisters');
-  const validSiblingCounts = [brothers, sisters].every(sibling=>
-    sibling &&
-    Number.isInteger(sibling.total) && sibling.total >= 0 && sibling.total <= 4 &&
-    Number.isInteger(sibling.married) && sibling.married >= 0 && sibling.married <= 4 &&
-    Number.isInteger(sibling.unmarried) && sibling.unmarried >= 0 && sibling.unmarried <= 4 &&
-    sibling.married + sibling.unmarried === sibling.total
-  );
-  if(!validSiblingCounts){
-    showToast('بھائیوں اور بہنوں کی تعداد شادی شدہ اور غیر شادی شدہ تعداد کے برابر ہونی چاہیے');
-    return;
-  }
-  data.siblings = JSON.stringify({brothers, sisters});
-  data.siblings_details = `Brothers: ${brothers.married} married, ${brothers.unmarried} unmarried; Sisters: ${sisters.married} married, ${sisters.unmarried} unmarried`;
 
   let imageUrl = '';
   const fileInput = document.getElementById('pImage');
