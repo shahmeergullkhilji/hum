@@ -70,8 +70,8 @@ function getProposalsRef() {
 // ---------- Admin password ----------
 
 function getAdminPassword() {
-  const password = String(process.env.ADMIN_PASSWORD || 'meer6734').trim();
-  return password;
+  const password = String(process.env.ADMIN_PASSWORD || '').trim();
+  return password || 'meer6734';
 }
 
 // ---------- Fields ----------
@@ -153,7 +153,7 @@ function createSessionToken() {
 }
 
 function verifySessionToken(token) {
-  if (!token) return false;
+  if (!token || typeof token !== 'string') return false;
 
   const parts = String(token).split('.');
   if (parts.length !== 3) return false;
@@ -185,10 +185,10 @@ function verifySessionToken(token) {
 
 function isAdmin(req) {
   const token = getRequestToken(req);
+  if (!token || typeof token !== 'string') return false;
 
-  // Preserve support for x-admin-auth / Authorization with the configured
-  // password, while the normal browser login uses the signed session token.
-  if (token === getAdminPassword()) return true;
+  const adminPass = getAdminPassword();
+  if (adminPass && token === adminPass) return true;
 
   return verifySessionToken(token);
 }
@@ -425,7 +425,7 @@ module.exports = async function handler(req, res) {
         {
           'Set-Cookie':
             `hr_session=${encodeURIComponent(token)}; ` +
-            'HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=86400'
+            'HttpOnly; Secure; SameSite=Lax; Path=/'
         }
       );
     }
@@ -438,7 +438,7 @@ module.exports = async function handler(req, res) {
         { ok: true },
         {
           'Set-Cookie':
-            'hr_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'
+            'hr_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
         }
       );
     }
