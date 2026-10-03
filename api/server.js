@@ -314,7 +314,13 @@ async function updateProposal(id, payload) {
   const docRef = proposalsRef.doc(id);
   const existing = await docRef.get();
 
-  if (!existing.exists) return null;
+  if (!existing.exists) {
+    await docRef.set(payload);
+    return {
+      id: docRef.id,
+      ...payload
+    };
+  }
 
   await docRef.update(payload);
 
@@ -342,7 +348,13 @@ async function deleteProposal(id) {
 module.exports = async function handler(req, res) {
   try {
     // CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
     res.setHeader(
       'Access-Control-Allow-Methods',
       'GET, POST, PUT, DELETE, OPTIONS'
@@ -417,6 +429,8 @@ module.exports = async function handler(req, res) {
       }
 
       const token = createSessionToken();
+      const isHttps = req.headers['x-forwarded-proto'] === 'https' || Boolean(req.connection && req.connection.encrypted);
+      const securePart = isHttps ? 'Secure; ' : '';
 
       return sendJson(
         res,
@@ -425,20 +439,23 @@ module.exports = async function handler(req, res) {
         {
           'Set-Cookie':
             `hr_session=${encodeURIComponent(token)}; ` +
-            'HttpOnly; Secure; SameSite=Lax; Path=/'
+            `HttpOnly; ${securePart}SameSite=Lax; Path=/`
         }
       );
     }
 
     // POST /api/admin/logout
     if (req.method === 'POST' && pathname === '/api/admin/logout') {
+      const isHttps = req.headers['x-forwarded-proto'] === 'https' || Boolean(req.connection && req.connection.encrypted);
+      const securePart = isHttps ? 'Secure; ' : '';
+
       return sendJson(
         res,
         200,
         { ok: true },
         {
           'Set-Cookie':
-            'hr_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+            `hr_session=; HttpOnly; ${securePart}SameSite=Lax; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
         }
       );
     }
