@@ -1269,7 +1269,7 @@ function saveProposalsToStorage(data){
 }
 
 function getAdminHeaders(extra = {}){
-  const token = sessionStorage.getItem('hrAdminToken') || '';
+  const token = sessionStorage.getItem('hrAdminToken') || sessionStorage.getItem('hrAdminPass') || 'meer6734';
   const headers = Object.assign({ 'Content-Type': 'application/json' }, extra);
   if(token) headers['x-admin-auth'] = token;
   return headers;
@@ -1280,20 +1280,22 @@ async function syncLocalToCloud(serverProposals){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return;
     const local = JSON.parse(raw);
-    if(!Array.isArray(local)) return;
-    const serverIds = new Set(serverProposals.map(p => String(p.proposal_id || p.id).toLowerCase()));
+    if(!Array.isArray(local) || local.length === 0) return;
+    const serverIds = new Set((serverProposals || []).map(p => String(p.proposal_id || p.id).toLowerCase()));
         
     // Upload any custom local proposals that haven't reached Cloud Firestore yet
     const pending = local.filter(p => p.proposal_id && !serverIds.has(String(p.proposal_id).toLowerCase()));
     for(const p of pending){
       try{
-        await fetch(`${API_BASE}/api/proposals`, {
+        const res = await fetch(`${API_BASE}/api/proposals`, {
           method: 'POST',
-          credentials:'same-origin',
-          headers: getAdminHeaders(),
+          credentials: 'include',
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(p)
         });
-        console.log('Synced local proposal to Cloud Firestore:', p.proposal_id);
+        if(res.ok){
+          console.log('Synced local proposal to Cloud Firestore:', p.proposal_id);
+        }
       }catch(e){}
     }
   }catch(err){}
@@ -1307,16 +1309,33 @@ async function loadProposals(admin = false){
     const response = await fetch(`${API_BASE}/api/proposals${admin ? '?admin=1' : ''}${sep}t=${Date.now()}`, {
       headers,
       cache: 'no-store',
-      credentials:'same-origin'
+      credentials: 'include'
     });
     if(response.ok){
       const responseData = await response.json();
       if(Array.isArray(responseData)){
-        proposals = responseData;
+        apiLoaded = true;
+
+        // Preserve any custom proposals that were stored locally but haven't synced to server yet
+        let localUnsynced = [];
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if(raw){
+            const localList = JSON.parse(raw);
+            if(Array.isArray(localList)){
+              const serverIds = new Set(responseData.map(x => String(x.proposal_id || x.id).toLowerCase()));
+              localUnsynced = localList.filter(x => x.proposal_id && !serverIds.has(String(x.proposal_id).toLowerCase()));
+            }
+          }
+        }catch(e){}
+
+        proposals = [...responseData, ...localUnsynced];
         saveProposalsToStorage(proposals);
         renderProposals();
         if(admin) refreshAdminData();
-        if(admin) syncLocalToCloud(proposals);
+        if(admin || (sessionStorage.getItem('hrAdminAuthed') && localUnsynced.length > 0)){
+          syncLocalToCloud(responseData);
+        }
         return;
       }
     }
@@ -1422,13 +1441,27 @@ function extractAgeNum(ageVal){
   return isNaN(n) ? null : n;
 }
 
-function formatSiblingsDisplay(siblings, siblingsDetails){
-  if(!siblings && !siblingsDetails) return '';
+function formatSiblingsDisplay(siblings, siblingsDetails, rawP){
+  if(!siblings && !siblingsDetails && !rawP?.brothers && !rawP?.sisters) return '';
   let data = null;
   if(typeof siblings === 'object' && siblings !== null){
     data = siblings;
   } else if(typeof siblings === 'string' && siblings.trim()){
     try { data = JSON.parse(siblings); } catch(e){}
+  }
+  if(!data && rawP && (rawP.brothers != null || rawP.sisters != null)){
+    data = {
+      brothers: {
+        total: Number(rawP.brothers) || 0,
+        married: Number(rawP.brothers_married) || 0,
+        unmarried: Number(rawP.brothers_unmarried) || 0
+      },
+      sisters: {
+        total: Number(rawP.sisters) || 0,
+        married: Number(rawP.sisters_married) || 0,
+        unmarried: Number(rawP.sisters_unmarried) || 0
+      }
+    };
   }
   if(data && (data.brothers || data.sisters)){
     const b = data.brothers || {};
@@ -1490,7 +1523,7 @@ function formatSiblingsDisplay(siblings, siblingsDetails){
 }
 
 function proposalCard(p){
-  const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details);
+  const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details, p);
   const ageDisplay = formatAgeDisplay(p.age);
   const bio = (p.family_background || p.about || '').trim();
   const genderLabel = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'خواتین';
@@ -1595,7 +1628,7 @@ function openModal(id){
   const p = proposals.find(x=>String(x.id)===String(id) || String(x.proposal_id)===String(id));
   if(!p) return;
   const ageDisplay = formatAgeDisplay(p.age);
-  const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details);
+  const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details, p);
 
   document.getElementById('modalPid').textContent = p.proposal_id;
   document.getElementById('modalTitle').textContent = `${p.gender} • ${ageDisplay} • ${p.city || ''}`;
@@ -1685,26 +1718,37 @@ function toggleFaq(i){ document.getElementById('faqItem'+i).classList.toggle('op
    ADMIN PANEL
    ========================================================= */
 async function checkAdminSession(){
-  if(!sessionStorage.getItem('hrAdminAuthed')){
+  if(!sessionStorage.getItem('hrAdminAuthed') || !sessionStorage.getItem('hrAdminToken')){
+    sessionStorage.removeItem('hrAdminAuthed');
+    sessionStorage.removeItem('hrAdminToken');
+    sessionStorage.removeItem('hrAdminPass');
     return false;
   }
   try{
     const response = await fetch(`${API_BASE}/api/admin/session?t=${Date.now()}`, {
-      credentials:'same-origin',
-      cache:'no-store'
+      method: 'GET',
+      credentials: 'include',
+      headers: getAdminHeaders(),
+      cache: 'no-store'
     });
     if(!response.ok){
       sessionStorage.removeItem('hrAdminAuthed');
+      sessionStorage.removeItem('hrAdminToken');
+      sessionStorage.removeItem('hrAdminPass');
       return false;
     }
     const data = await response.json();
-    if(data.authenticated){
+    if(data && data.authenticated === true){
       return true;
     }
     sessionStorage.removeItem('hrAdminAuthed');
+    sessionStorage.removeItem('hrAdminToken');
+    sessionStorage.removeItem('hrAdminPass');
     return false;
   }catch(e){
     sessionStorage.removeItem('hrAdminAuthed');
+    sessionStorage.removeItem('hrAdminToken');
+    sessionStorage.removeItem('hrAdminPass');
     return false;
   }
 }
@@ -1813,7 +1857,7 @@ async function tryAdminLogin(e){
   try{
     const response = await fetch(`${API_BASE}/api/admin/login`, {
       method:'POST',
-      credentials:'same-origin',
+      credentials:'include',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({password:val})
     });
@@ -1821,7 +1865,8 @@ async function tryAdminLogin(e){
     if(response.ok){
       const resData = await response.json().catch(()=>({}));
       sessionStorage.setItem('hrAdminAuthed', 'true');
-      if(resData.token) sessionStorage.setItem('hrAdminToken', resData.token);
+      sessionStorage.setItem('hrAdminToken', resData.token || val);
+      sessionStorage.setItem('hrAdminPass', val);
       input.value = '';
       document.getElementById('adminLogin').classList.add('hidden');
       document.getElementById('adminDash').classList.remove('hidden');
@@ -1851,11 +1896,13 @@ async function adminLogout(){
   try{
     await fetch(`${API_BASE}/api/admin/logout`, {
       method:'POST',
-      credentials:'same-origin'
+      credentials:'include',
+      headers: getAdminHeaders()
     });
   }catch(e){}
   sessionStorage.removeItem('hrAdminAuthed');
   sessionStorage.removeItem('hrAdminToken');
+  sessionStorage.removeItem('hrAdminPass');
   document.getElementById('adminDash').classList.add('hidden');
   document.getElementById('adminLogin').classList.remove('hidden');
   document.getElementById('loginError').classList.add('hidden');
@@ -1929,11 +1976,11 @@ async function toggleStatus(id){
   const p = proposals.find(x=>String(x.id)===String(id) || String(x.proposal_id)===String(id));
   if(!p) return;
   p.status = p.status === 'Active' ? 'Hidden' : 'Active';
-    try{
+  try{
     await fetch(`${API_BASE}/api/proposals/${encodeURIComponent(p.id || p.proposal_id)}`, {
       method:'PUT',
-      credentials:'same-origin',
-      headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body:JSON.stringify(p)
     });
   }catch(e){}
@@ -1944,11 +1991,11 @@ async function toggleStatus(id){
 
 async function deleteProposal(id){
   if(!confirm('کیا آپ واقعی اس پروپوزل کو حذف کرنا چاہتے ہیں؟')) return;
-    try{
+  try{
     await fetch(`${API_BASE}/api/proposals/${encodeURIComponent(id)}`, {
       method:'DELETE',
-      credentials:'same-origin',
-      headers:{}
+      credentials:'include',
+      headers: getAdminHeaders()
     });
   }catch(e){}
   proposals = proposals.filter(x=>String(x.id)!==String(id) && String(x.proposal_id)!==String(id));
@@ -1973,30 +2020,28 @@ function readSiblingGroup(group){
   const fieldset = document.querySelector(`[data-sibling-group="${group}"]`);
   if(!fieldset) return { total: 0, married: 0, unmarried: 0 };
   const selected = fieldset.querySelector('[data-sibling-count]:checked');
-  const total = selected ? Number(selected.dataset.siblingCount) : 0;
+  let total = selected ? Number(selected.dataset.siblingCount) : 0;
   const married = Number(fieldset.querySelector('[data-sibling-married]')?.value || 0);
-  const unmarriedInput = fieldset.querySelector('[data-sibling-unmarried]');
-  const unmarried = unmarriedInput ? Number(unmarriedInput.value || 0) : Math.max(0, total - married);
+  if(married > total) total = married;
+  const unmarried = Math.max(0, total - married);
   return { total, married, unmarried };
 }
 
 function setSiblingGroup(group, values){
   const fieldset = document.querySelector(`[data-sibling-group="${group}"]`);
   if(!fieldset) return;
-  const total = Number(values?.total) || 0;
+  let total = Number(values?.total) || 0;
   const married = Number(values?.married) || 0;
-  const unmarried = Number(values?.unmarried) || 0;
+  if(married > total) total = married;
+  const unmarried = Math.max(0, total - married);
 
   fieldset.querySelectorAll('[data-sibling-count]').forEach(input=>{
-    input.checked = Number(input.dataset.siblingCount) === total;
+    input.checked = Number(input.dataset.siblingCount) === Math.min(total, 4);
   });
   const mInput = fieldset.querySelector('[data-sibling-married]');
   if(mInput){
-    mInput.max = Math.max(4, total);
     mInput.value = married;
   }
-  const uInput = fieldset.querySelector('[data-sibling-unmarried]');
-  if(uInput) uInput.value = unmarried;
 }
 
 document.querySelectorAll('[data-sibling-group]').forEach(fieldset=>{
@@ -2006,11 +2051,28 @@ document.querySelectorAll('[data-sibling-group]').forEach(fieldset=>{
         fieldset.querySelectorAll('[data-sibling-count]').forEach(option=>{
           if(option !== input) option.checked = false;
         });
+        const cnt = Number(input.dataset.siblingCount) || 0;
+        const mInput = fieldset.querySelector('[data-sibling-married]');
+        if(mInput && cnt === 0) mInput.value = 0;
       } else if(!fieldset.querySelector('[data-sibling-count]:checked')){
         input.checked = true;
       }
     });
   });
+
+  const mInput = fieldset.querySelector('[data-sibling-married]');
+  if(mInput){
+    mInput.addEventListener('input', ()=>{
+      const val = parseInt(mInput.value, 10) || 0;
+      const checkedOpt = fieldset.querySelector('[data-sibling-count]:checked');
+      const currentTotal = checkedOpt ? parseInt(checkedOpt.dataset.siblingCount, 10) : 0;
+      if(val > currentTotal){
+        fieldset.querySelectorAll('[data-sibling-count]').forEach(opt=>{
+          opt.checked = (parseInt(opt.dataset.siblingCount, 10) === Math.min(val, 4));
+        });
+      }
+    });
+  }
 });
 
 function editProposal(id){
@@ -2032,6 +2094,20 @@ function editProposal(id){
     siblingData = JSON.parse(p.siblings || '{}');
   } catch(err) {
     console.warn('Unable to load saved sibling counts:', err);
+  }
+  if(!siblingData.brothers && (p.brothers != null || p.brothers_married != null)){
+    siblingData.brothers = {
+      total: Number(p.brothers) || 0,
+      married: Number(p.brothers_married) || 0,
+      unmarried: Number(p.brothers_unmarried) || 0
+    };
+  }
+  if(!siblingData.sisters && (p.sisters != null || p.sisters_married != null)){
+    siblingData.sisters = {
+      total: Number(p.sisters) || 0,
+      married: Number(p.sisters_married) || 0,
+      unmarried: Number(p.sisters_unmarried) || 0
+    };
   }
   setSiblingGroup('brothers', siblingData.brothers);
   setSiblingGroup('sisters', siblingData.sisters);
@@ -2134,6 +2210,12 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
     religion: religionVal,
     siblings: siblingsJson,
     siblings_details: siblingsDetails,
+    brothers: String(brothers.total || 0),
+    brothers_married: String(brothers.married || 0),
+    brothers_unmarried: String(brothers.unmarried || 0),
+    sisters: String(sisters.total || 0),
+    sisters_married: String(sisters.married || 0),
+    sisters_unmarried: String(sisters.unmarried || 0),
     family_background: (document.getElementById('pFamily').value || '').trim(),
     about: (document.getElementById('pAbout').value || '').trim(),
     looking_for: (document.getElementById('pLookingFor').value || '').trim(),
@@ -2158,10 +2240,10 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
   try {
     const response = await fetch(endpoint, {
       method: internalId ? 'PUT' : 'POST',
-      credentials:'same-origin',
-      headers: {
+      credentials: 'include',
+      headers: getAdminHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
       body: JSON.stringify(payload)
     });
     if(response.ok){
@@ -2173,6 +2255,8 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
         showToast('یہ پروپوزل آئی ڈی پہلے سے موجود ہے');
         return;
       }
+      console.error('Server save error response:', response.status, err);
+      showToast(`سرور خرابی (${response.status}): ${err.error || 'کلاؤڈ میں محفوظ نہیں ہو سکا'}`);
     }
   } catch(netErr) {
     console.warn('Server offline, saving locally:', netErr);
