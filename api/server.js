@@ -78,7 +78,10 @@ function getAdminPassword() {
 
 const fields = [
   'proposal_id', 'gender', 'age', 'city', 'education', 'ethnicity', 'profession', 'height',
-  'marital_status', 'religion', 'siblings', 'siblings_details', 'family_background', 'about', 'looking_for',
+  'marital_status', 'religion', 'siblings', 'siblings_details',
+  'brothers', 'brothers_married', 'brothers_unmarried',
+  'sisters', 'sisters_married', 'sisters_unmarried',
+  'family_background', 'about', 'looking_for',
   'image_url', 'status', 'created_at'
 ];
 
@@ -369,17 +372,18 @@ module.exports = async function handler(req, res) {
       return res.end();
     }
 
-    let pathname = new URL(
-      req.url,
-      `https://${req.headers.host || 'localhost'}`
-    ).pathname;
+    let originalUrl = req.headers['x-forwarded-uri'] || req.headers['x-invoke-path'] || req.url || '';
+    let parsedUrl = new URL(originalUrl, `https://${req.headers.host || 'localhost'}`);
+    let pathname = parsedUrl.pathname;
 
-    if (req.headers['x-matched-path'] && !req.headers['x-matched-path'].startsWith('/api/server') && !req.headers['x-matched-path'].startsWith('/api/[...')) {
-      pathname = new URL(req.headers['x-matched-path'], `https://${req.headers.host || 'localhost'}`).pathname;
-    } else if (req.query && Array.isArray(req.query.all)) {
-      pathname = '/api/' + req.query.all.join('/');
-    } else if (req.query && typeof req.query.all === 'string') {
-      pathname = '/api/' + req.query.all;
+    if (pathname === '/api/server' || pathname === '/api' || pathname === '/') {
+      const qPath = (req.query && (req.query.path || req.query.all)) || parsedUrl.searchParams.get('path');
+      if (qPath) {
+        const cleanPath = Array.isArray(qPath) ? qPath.join('/') : String(qPath);
+        pathname = '/api/' + cleanPath.replace(/^\/?(api\/)?/, '');
+      } else if (req.headers['x-matched-path'] && !req.headers['x-matched-path'].startsWith('/api/server')) {
+        pathname = new URL(req.headers['x-matched-path'], `https://${req.headers.host || 'localhost'}`).pathname;
+      }
     }
 
     // GET /api/proposals
