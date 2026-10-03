@@ -914,7 +914,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
             <select id="fGender" class="f-input">
               <option value="">تمام</option>
               <option value="مرد">مرد</option>
-              <option value="خواتین">خواتین</option>
+              <option value="لڑکی /خاتون">لڑکی /خاتون</option>
             </select>
           </div>
           <div>
@@ -1109,7 +1109,7 @@ table.admin-table td{ padding:12px 8px; border-bottom:1px solid #f0e8d6; vertica
             </div>
             <div class="a-field">
               <label>جنس</label>
-              <select id="pGender"><option value="مرد">مرد (لڑکا)</option><option value="خواتین">خاتون (لڑکی)</option></select>
+              <select id="pGender"><option value="مرد">مرد (لڑکا)</option><option value="لڑکی /خاتون">لڑکی /خاتون</option></select>
             </div>
             <div class="a-field">
               <label>عمر / تاریخ پیدائش</label>
@@ -1274,32 +1274,6 @@ function getAdminHeaders(extra = {}){
   return headers;
 }
 
-async function syncLocalToCloud(serverProposals){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return;
-    const local = JSON.parse(raw);
-    if(!Array.isArray(local) || local.length === 0) return;
-    const serverIds = new Set((serverProposals || []).map(p => String(p.proposal_id || p.id).toLowerCase()));
-        
-    // Upload any custom local proposals that haven't reached Cloud Firestore yet
-    const pending = local.filter(p => p.proposal_id && !serverIds.has(String(p.proposal_id).toLowerCase()));
-    for(const p of pending){
-      try{
-        const res = await fetch(`${API_BASE}/api/proposals`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify(p)
-        });
-        if(res.ok){
-          console.log('Synced local proposal to Cloud Firestore:', p.proposal_id);
-        }
-      }catch(e){}
-    }
-  }catch(err){}
-}
-
 async function loadProposals(admin = false){
   let apiLoaded = false;
   try{
@@ -1314,26 +1288,12 @@ async function loadProposals(admin = false){
       const responseData = await response.json();
       if(Array.isArray(responseData)){
         apiLoaded = true;
-
-        // Preserve any custom proposals that were stored locally but haven't synced to server yet
-        let localUnsynced = [];
-        try{
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if(raw){
-            const localList = JSON.parse(raw);
-            if(Array.isArray(localList)){
-              const serverIds = new Set(responseData.map(x => String(x.proposal_id || x.id).toLowerCase()));
-              localUnsynced = localList.filter(x => x.proposal_id && !serverIds.has(String(x.proposal_id).toLowerCase()));
-            }
-          }
-        }catch(e){}
-
-        proposals = [...responseData, ...localUnsynced];
+        proposals = responseData;
         saveProposalsToStorage(proposals);
         renderProposals();
-        if(admin) refreshAdminData();
-        if(admin || (sessionStorage.getItem('hrAdminAuthed') && localUnsynced.length > 0)){
-          syncLocalToCloud(responseData);
+        if(admin){
+          refreshAdminData();
+          renderManageTable();
         }
         return;
       }
@@ -1373,6 +1333,17 @@ window.addEventListener('storage', (e) => {
 });
 
 loadProposals();
+
+function refreshVisibleProposals(){
+  if(document.visibilityState !== 'visible') return;
+  const adminView = document.getElementById('adminSite').style.display === 'block';
+  const isAdmin = adminView && sessionStorage.getItem('hrAdminAuthed') === 'true';
+  loadProposals(isAdmin);
+}
+
+window.addEventListener('focus', refreshVisibleProposals);
+document.addEventListener('visibilitychange', refreshVisibleProposals);
+setInterval(refreshVisibleProposals, 15000);
 
 /* =========================================================
    CONTACT CONFIG INJECTION
@@ -1525,7 +1496,7 @@ function proposalCard(p){
   const sibText = formatSiblingsDisplay(p.siblings, p.siblings_details, p);
   const ageDisplay = formatAgeDisplay(p.age);
   const bio = (p.family_background || p.about || '').trim();
-  const genderLabel = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'خواتین';
+  const genderLabel = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'لڑکی /خاتون';
 
   return `
   <div class="proposal-card reveal in p-6 flex flex-col justify-between">
@@ -1926,11 +1897,11 @@ function switchAdminTab(tabId, btn){
 function refreshAdminData(){
   const total = proposals.length;
   const male = proposals.filter(p=>p.gender==='مرد').length;
-  const female = proposals.filter(p=>p.gender==='خواتین').length;
+  const female = proposals.filter(p=>p.gender !== 'مرد' && p.gender !== 'لڑکا').length;
   const active = proposals.filter(p=>p.status==='Active').length;
   const hidden = proposals.filter(p=>p.status==='Hidden').length;
   const stats = [
-    ['کل پروپوزلز', total], ['مرد', male], ['خواتین', female], ['فعال', active], ['مخفی', hidden]
+    ['کل پروپوزلز', total], ['مرد', male], ['لڑکی /خاتون', female], ['فعال', active], ['مخفی', hidden]
   ];
   document.getElementById('statGrid').innerHTML = stats.map(s=>`
     <div class="stat-card"><div class="stat-num">${s[1]}</div><div style="color:#8a7275; font-size:.88rem; margin-top:4px;">${s[0]}</div></div>
@@ -1974,33 +1945,54 @@ document.getElementById('manageSearch').addEventListener('input', renderManageTa
 async function toggleStatus(id){
   const p = proposals.find(x=>String(x.id)===String(id) || String(x.proposal_id)===String(id));
   if(!p) return;
-  p.status = p.status === 'Active' ? 'Hidden' : 'Active';
   try{
-    await fetch(`${API_BASE}/api/proposals/${encodeURIComponent(p.id || p.proposal_id)}`, {
+    const updated = Object.assign({}, p, {
+      status: p.status === 'Active' ? 'Hidden' : 'Active'
+    });
+    const response = await fetch(`${API_BASE}/api/proposals/${encodeURIComponent(p.id || p.proposal_id)}`, {
       method:'PUT',
       credentials:'include',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
-      body:JSON.stringify(p)
+      body:JSON.stringify(updated)
     });
-  }catch(e){}
+    if(!response.ok){
+      const error = await response.json().catch(()=>({}));
+      throw new Error(error.error || `سرور خرابی (${response.status})`);
+    }
+    const saved = await response.json();
+    const index = proposals.findIndex(x=>String(x.id)===String(id) || String(x.proposal_id)===String(id));
+    if(index !== -1) proposals[index] = saved;
+  }catch(error){
+    console.error('Proposal status update failed:', error);
+    showToast('خرابی: ' + (error.message || 'سٹیٹس ڈیٹا بیس میں محفوظ نہیں ہوا'));
+    return;
+  }
   saveProposalsToStorage(proposals);
   renderManageTable(); refreshAdminData(); renderProposals();
-  showToast('سٹیٹس تبدیل کر دیا گیا');
+  showToast('سٹیٹس ڈیٹا بیس میں تبدیل کر دیا گیا');
 }
 
 async function deleteProposal(id){
   if(!confirm('کیا آپ واقعی اس پروپوزل کو حذف کرنا چاہتے ہیں؟')) return;
   try{
-    await fetch(`${API_BASE}/api/proposals/${encodeURIComponent(id)}`, {
+    const response = await fetch(`${API_BASE}/api/proposals/${encodeURIComponent(id)}`, {
       method:'DELETE',
       credentials:'include',
       headers: getAdminHeaders()
     });
-  }catch(e){}
+    if(!response.ok){
+      const error = await response.json().catch(()=>({}));
+      throw new Error(error.error || `سرور خرابی (${response.status})`);
+    }
+  }catch(error){
+    console.error('Proposal deletion failed:', error);
+    showToast('خرابی: ' + (error.message || 'پروپوزل ڈیٹا بیس سے حذف نہیں ہوا'));
+    return;
+  }
   proposals = proposals.filter(x=>String(x.id)!==String(id) && String(x.proposal_id)!==String(id));
   saveProposalsToStorage(proposals);
   renderManageTable(); refreshAdminData(); renderProposals();
-  showToast('پروپوزل حذف کر دیا گیا');
+  showToast('پروپوزل ڈیٹا بیس سے حذف کر دیا گیا');
 }
 
 function getNextProposalId(){
@@ -2079,7 +2071,7 @@ function editProposal(id){
   if(!p) return;
   document.getElementById('pInternalId').value = p.id || p.proposal_id;
   document.getElementById('pProposalId').value = p.proposal_id;
-  document.getElementById('pGender').value = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'خواتین';
+  document.getElementById('pGender').value = (p.gender === 'مرد' || p.gender === 'لڑکا') ? 'مرد' : 'لڑکی /خاتون';
   document.getElementById('pAge').value = p.age || '';
   document.getElementById('pCity').value = p.city || 'لاہور';
   document.getElementById('pEthnicity').value = p.ethnicity || '';
@@ -2270,12 +2262,9 @@ document.getElementById('proposalForm').addEventListener('submit', async functio
 
     const saved = await response.json();
     if(internalId){
-      const idx = proposals.findIndex(x => String(x.id) === String(internalId) || String(x.proposal_id) === String(internalId));
-      if(idx !== -1) Object.assign(proposals[idx], saved);
-      else proposals.unshift(saved);
-    } else {
-      proposals.unshift(saved);
+      proposals = proposals.filter(x => String(x.id) !== String(internalId) && String(x.proposal_id) !== String(internalId));
     }
+    proposals.unshift(saved);
 
     saveProposalsToStorage(proposals);
     resetProposalForm();

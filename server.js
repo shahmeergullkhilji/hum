@@ -1,80 +1,63 @@
-const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+
+const { initializeApp, cert, applicationDefault } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-/*
- * Vercel-compatible Humsafar Rishta API
- *
- * Frontend/static files are served by Vercel.
- * API routes are handled through /api/*.
- *
- * Required Vercel Environment Variables:
- *   FIREBASE_PROJECT_ID
- *   FIREBASE_CLIENT_EMAIL
- *   FIREBASE_PRIVATE_KEY
- *   ADMIN_PASSWORD
- *
- * Do NOT upload the Firebase service-account JSON file to GitHub.
- */
+const PORT = Number(process.env.PORT || 3000);
+const ALLOWED_PASSWORDS = new Set([
+  'meer6734',
+  ...(process.env.ADMIN_PASSWORD ? [String(process.env.ADMIN_PASSWORD).trim()] : [])
+]);
+const ROOT = __dirname;
+const sessions = new Map();
 
-// ---------- Firebase ----------
+// Brute-force protection: track failed login attempts per IP
+const loginAttempts = new Map(); // ip -> { count, lockedUntil }
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 
-function getFirebaseApp() {
-  if (getApps().length) return getApps()[0];
+// Files that must NEVER be served to any client
+const BLOCKED_FILES = new Set([
+  'serviceaccountkey.json',
+  'humsafar-rishta-firebase-adminsdk-fbsvc-e7b20ae956.json',
+  'cookies.txt',
+  'humsafar.sqlite',
+  'firebase-debug.log',
+  'package.json',
+  'package-lock.json',
+  '.gitignore',
+  'readme.md',
+  'server.js',
+  'server.log',
+  'firebase.json',
+  'firestore.rules',
+  'firestore.indexes.json',
+]);
 
-  const fs = require('node:fs');
-  const path = require('node:path');
-  const localKey = path.join(process.cwd(), 'serviceAccountKey.json');
-  if (fs.existsSync(localKey)) {
-    try {
-      const sa = JSON.parse(fs.readFileSync(localKey, 'utf8'));
-      return initializeApp({ credential: cert(sa) });
-    } catch (e) {}
-  }
+/* =========================================================
+   FIREBASE INITIALIZATION
+   ========================================================= */
+const SERVICE_ACCOUNT_PATH = process.env.FIREBASE_SERVICE_ACCOUNT_PATH
+  || path.join(ROOT, 'serviceAccountKey.json');
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error(
-      'Missing Firebase environment variables: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY'
-    );
-  }
-
-  if (privateKey) {
-    privateKey = privateKey.trim();
-    if (
-      (privateKey.startsWith('"') && privateKey.endsWith('"')) ||
-      (privateKey.startsWith("'") && privateKey.endsWith("'"))
-    ) {
-      privateKey = privateKey.slice(1, -1);
-    }
-    privateKey = privateKey.replace(/\\n/g, '\n');
-  }
-
-  return initializeApp({
-    credential: cert({
-      projectId,
-      clientEmail,
-      privateKey
-    })
+if (fs.existsSync(SERVICE_ACCOUNT_PATH)) {
+  const serviceAccount = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_PATH, 'utf8'));
+  initializeApp({ credential: cert(serviceAccount) });
+} else if (process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.FIREBASE_PROJECT_ID) {
+  initializeApp({
+    credential: applicationDefault(),
+    projectId: process.env.FIREBASE_PROJECT_ID
   });
+} else {
+  console.error('ERROR: No Firebase credentials found.');
+  process.exit(1);
 }
 
-function getProposalsRef() {
-  const app = getFirebaseApp();
-  const db = getFirestore(app);
-  return { db, proposalsRef: db.collection('proposals') };
-}
-
-// ---------- Admin password ----------
-
-function getAdminPassword() {
-  const password = String(process.env.ADMIN_PASSWORD || '').trim();
-  return password || 'meer6734';
-}
-
-// ---------- Fields ----------
+const db = getFirestore();
+const proposalsRef = db.collection('proposals');
 
 const fields = [
   'proposal_id', 'gender', 'age', 'city', 'education', 'ethnicity', 'profession', 'height',
@@ -85,115 +68,44 @@ const fields = [
   'image_url', 'status', 'created_at'
 ];
 
-const SEED_PROPOSAL_IDS = new Set();
-
-// ---------- Helpers ----------
-
+/* =========================================================
+   HELPERS
+   ========================================================= */
 function sendJson(res, status, body, extraHeaders = {}) {
-  res.statusCode = status;
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader(
-    'Cache-Control',
-    'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0'
-  );
-  res.setHeader('CDN-Cache-Control', 'no-store');
-  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
-  for (const [key, value] of Object.entries(extraHeaders)) {
-    res.setHeader(key, value);
+  const payload = JSON.stringify(body);
+  const req = res.req;
+  const origin = (req && req.headers && req.headers.origin) ? req.headers.origin : '*';
+  const corsHeaders = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-auth, Access-Control-Request-Private-Network',
+    'Access-Control-Allow-Private-Network': 'true',
+    ...extraHeaders
+  };
+  if (origin !== '*') {
+    corsHeaders['Access-Control-Allow-Credentials'] = 'true';
   }
-  res.end(JSON.stringify(body));
+  res.writeHead(status, corsHeaders);
+  res.end(payload);
 }
 
 function parseCookies(req) {
-  const raw = req.headers.cookie || '';
-  const result = {};
-
-  for (const part of raw.split(';')) {
-    const index = part.indexOf('=');
-    if (index === -1) continue;
-
-    const key = part.slice(0, index).trim();
-    const value = part.slice(index + 1).trim();
-
-    try {
-      result[key] = decodeURIComponent(value);
-    } catch {
-      result[key] = value;
-    }
-  }
-
-  return result;
-}
-
-function getRequestToken(req) {
-  const cookies = parseCookies(req);
-  if (cookies.hr_session) return cookies.hr_session;
-
-  const authHeader = req.headers['x-admin-auth'] || req.headers.authorization;
-  if (!authHeader) return '';
-
-  return String(authHeader).replace(/^Bearer\s+/i, '').trim();
-}
-
-/*
- * Stateless admin authentication for Vercel.
- *
- * Instead of storing sessions in a server-side Map (which is not reliable
- * across Vercel instances), the login endpoint creates a signed token.
- */
-const crypto = require('node:crypto');
-
-function createSessionToken() {
-  const timestamp = String(Date.now());
-  const nonce = crypto.randomBytes(24).toString('hex');
-  const payload = `${timestamp}.${nonce}`;
-  const signature = crypto
-    .createHmac('sha256', getAdminPassword())
-    .update(payload)
-    .digest('hex');
-
-  return `${payload}.${signature}`;
-}
-
-function verifySessionToken(token) {
-  if (!token || typeof token !== 'string') return false;
-
-  const parts = String(token).split('.');
-  if (parts.length !== 3) return false;
-
-  const [timestamp, nonce, signature] = parts;
-  if (!/^\d+$/.test(timestamp) || !/^[a-f0-9]+$/i.test(nonce)) return false;
-  if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
-
-  const age = Date.now() - Number(timestamp);
-  if (!Number.isFinite(age) || age < 0 || age > 24 * 60 * 60 * 1000) {
-    return false;
-  }
-
-  const payload = `${timestamp}.${nonce}`;
-  const expected = crypto
-    .createHmac('sha256', getAdminPassword())
-    .update(payload)
-    .digest('hex');
-
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, 'hex'),
-      Buffer.from(expected, 'hex')
-    );
-  } catch {
-    return false;
-  }
+  return Object.fromEntries((req.headers.cookie || '').split(';').filter(Boolean).map(pair => {
+    const index = pair.indexOf('=');
+    return [pair.slice(0, index).trim(), decodeURIComponent(pair.slice(index + 1).trim())];
+  }));
 }
 
 function isAdmin(req) {
-  const token = getRequestToken(req);
-  if (!token || typeof token !== 'string') return false;
-
-  const adminPass = getAdminPassword();
-  if (adminPass && token === adminPass) return true;
-
-  return verifySessionToken(token);
+  const token = parseCookies(req).hr_session;
+  if (token && typeof token === 'string' && sessions.has(token)) return true;
+  const authHeader = req.headers['x-admin-auth'] || req.headers['authorization'];
+  if (authHeader) {
+    const clean = String(authHeader).replace(/^Bearer\s+/i, '').trim();
+    if (clean && (ALLOWED_PASSWORDS.has(clean) || sessions.has(clean))) return true;
+  }
+  return false;
 }
 
 function requireAdmin(req, res) {
@@ -202,118 +114,60 @@ function requireAdmin(req, res) {
   return false;
 }
 
-async function readBody(req) {
-  if (req.body && typeof req.body === 'object') {
-    return req.body;
-  }
-
-  let raw = '';
-
-  await new Promise((resolve, reject) => {
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
     req.on('data', chunk => {
-      raw += chunk;
-
-      if (raw.length > 12 * 1024 * 1024) {
-        reject(new Error('Request body too large'));
-        req.destroy();
-      }
+      body += chunk;
+      if (body.length > 12 * 1024 * 1024) req.destroy();
     });
-
-    req.on('end', resolve);
+    req.on('end', () => {
+      try { resolve(body ? JSON.parse(body) : {}); } catch { reject(new Error('Invalid JSON')); }
+    });
     req.on('error', reject);
   });
-
-  if (!raw) return {};
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    throw new Error('Invalid JSON');
-  }
 }
 
 function proposalPayload(body) {
-  const payload = Object.fromEntries(
-    fields.map(field => [field, body[field] != null ? String(body[field]).trim() : ''])
-  );
-
+  const payload = Object.fromEntries(fields.map(field => [field, body[field] != null ? String(body[field]).trim() : '']));
   if (!payload.proposal_id) {
     payload.proposal_id = 'HR-' + Math.floor(1000 + Math.random() * 9000);
   }
-
-  payload.created_at =
-    payload.created_at || new Date().toISOString().slice(0, 10);
+  payload.created_at = payload.created_at || new Date().toISOString().slice(0, 10);
   payload.status = payload.status || 'Active';
-
   return payload;
 }
 
-// ---------- Firestore ----------
-
+/* =========================================================
+   FIRESTORE CRUD
+   ========================================================= */
 async function getProposals(admin) {
-  const { proposalsRef } = getProposalsRef();
   let query = proposalsRef;
-
   if (!admin) {
     query = query.where('status', '==', 'Active');
   }
-
   try {
     const snapshot = await query.orderBy('created_at', 'desc').get();
-
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
-    console.warn('Fallback in-memory sort for proposals:', err.message);
-
     const snapshot = await query.get();
-
-    const docs = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    docs.sort((a, b) =>
-      (b.created_at || '').localeCompare(a.created_at || '')
-    );
-
+    const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    docs.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
     return docs;
   }
 }
 
-async function getProposalById(id) {
-  const { proposalsRef } = getProposalsRef();
-  const doc = await proposalsRef.doc(id).get();
-
-  if (!doc.exists) return null;
-
-  return {
-    id: doc.id,
-    ...doc.data()
-  };
-}
-
 async function createProposal(payload) {
-  const { proposalsRef } = getProposalsRef();
   const docRef = proposalsRef.doc(payload.proposal_id);
   const existing = await docRef.get();
-
   if (existing.exists) {
     throw new Error('UNIQUE constraint failed: proposal_id already exists');
   }
-
   await docRef.set(payload);
-
-  return {
-    id: docRef.id,
-    ...payload
-  };
+  return { id: docRef.id, ...payload };
 }
 
 async function updateProposal(id, payload) {
-  const { db, proposalsRef } = getProposalsRef();
   const docRef = proposalsRef.doc(id);
   const updatedRef = proposalsRef.doc(payload.proposal_id);
   const updated = await db.runTransaction(async transaction => {
@@ -333,189 +187,164 @@ async function updateProposal(id, payload) {
 
     return { id: updatedRef.id, ...payload };
   });
-  if (!updated) return null;
-
   return updated;
 }
 
 async function deleteProposal(id) {
-  const { proposalsRef } = getProposalsRef();
   const docRef = proposalsRef.doc(id);
   const existing = await docRef.get();
-
   if (!existing.exists) return false;
-
   await docRef.delete();
   return true;
 }
 
-// ---------- API ----------
-
-module.exports = async function handler(req, res) {
-  try {
-    // CORS
-    const origin = req.headers.origin;
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-    } else {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-    }
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, OPTIONS'
-    );
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, x-admin-auth'
-    );
-
-    if (req.method === 'OPTIONS') {
-      res.statusCode = 204;
-      return res.end();
-    }
-
-    let originalUrl = req.headers['x-forwarded-uri'] || req.headers['x-invoke-path'] || req.url || '';
-    let parsedUrl = new URL(originalUrl, `https://${req.headers.host || 'localhost'}`);
-    let pathname = parsedUrl.pathname;
-
-    if (pathname === '/api/server' || pathname === '/api' || pathname === '/') {
-      const qPath = (req.query && (req.query.path || req.query.all)) || parsedUrl.searchParams.get('path');
-      if (qPath) {
-        const cleanPath = Array.isArray(qPath) ? qPath.join('/') : String(qPath);
-        pathname = '/api/' + cleanPath.replace(/^\/?(api\/)?/, '');
-      } else if (req.headers['x-matched-path'] && !req.headers['x-matched-path'].startsWith('/api/server')) {
-        pathname = new URL(req.headers['x-matched-path'], `https://${req.headers.host || 'localhost'}`).pathname;
-      }
-    }
-
-    // GET /api/proposals
-    if (req.method === 'GET' && pathname === '/api/proposals') {
-      const requestUrl = new URL(
-        req.url,
-        `https://${req.headers.host || 'localhost'}`
-      );
-
-      const adminMode =
-        isAdmin(req) && requestUrl.searchParams.get('admin') === '1';
-
-      return sendJson(res, 200, await getProposals(adminMode));
-    }
-
-    // GET /api/proposals/{id}
-    if (req.method === 'GET' && /^\/api\/proposals\/[^/]+$/.test(pathname)) {
-      const id = decodeURIComponent(pathname.split('/').pop());
-      const proposal = await getProposalById(id);
-
-      if (!proposal) {
-        return sendJson(res, 404, { error: 'Not found' });
-      }
-
-      // Do not expose hidden proposals to unauthenticated users.
-      if (proposal.status !== 'Active' && !isAdmin(req)) {
-        return sendJson(res, 404, { error: 'Not found' });
-      }
-
-      return sendJson(res, 200, proposal);
-    }
-
-    // GET /api/admin/session
-    if (req.method === 'GET' && pathname === '/api/admin/session') {
-      return sendJson(res, 200, {
-        authenticated: isAdmin(req)
-      });
-    }
-
-    // POST /api/admin/login
-    if (req.method === 'POST' && pathname === '/api/admin/login') {
-      const body = await readBody(req);
-      const pass = String(body.password || '').trim();
-
-      if (!pass || pass !== getAdminPassword()) {
-        return sendJson(res, 401, { error: 'Invalid password' });
-      }
-
-      const token = createSessionToken();
-      const isHttps = req.headers['x-forwarded-proto'] === 'https' || Boolean(req.connection && req.connection.encrypted);
-      const securePart = isHttps ? 'Secure; ' : '';
-
-      return sendJson(
-        res,
-        200,
-        { ok: true, token },
-        {
-          'Set-Cookie':
-            `hr_session=${encodeURIComponent(token)}; ` +
-            `HttpOnly; ${securePart}SameSite=Lax; Path=/`
-        }
-      );
-    }
-
-    // POST /api/admin/logout
-    if (req.method === 'POST' && pathname === '/api/admin/logout') {
-      const isHttps = req.headers['x-forwarded-proto'] === 'https' || Boolean(req.connection && req.connection.encrypted);
-      const securePart = isHttps ? 'Secure; ' : '';
-
-      return sendJson(
-        res,
-        200,
-        { ok: true },
-        {
-          'Set-Cookie':
-            `hr_session=; HttpOnly; ${securePart}SameSite=Lax; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
-        }
-      );
-    }
-
-    // Everything below this point requires admin authentication.
-    if (pathname.startsWith('/api/proposals')) {
-      if (!requireAdmin(req, res)) return;
-
-      if (req.method === 'POST' && pathname === '/api/proposals') {
-        const payload = proposalPayload(await readBody(req));
-        const created = await createProposal(payload);
-
-        return sendJson(res, 201, created);
-      }
-
-      const match = pathname.match(/^\/api\/proposals\/([^/]+)$/);
-
-      if (!match) {
-        return sendJson(res, 404, { error: 'Not found' });
-      }
-
-      const id = decodeURIComponent(match[1]);
-
-      if (req.method === 'PUT') {
-        const payload = proposalPayload(await readBody(req));
-        const updated = await updateProposal(id, payload);
-
-        if (!updated) {
-          return sendJson(res, 404, { error: 'Not found' });
-        }
-
-        return sendJson(res, 200, updated);
-      }
-
-      if (req.method === 'DELETE') {
-        const deleted = await deleteProposal(id);
-
-        if (!deleted) {
-          return sendJson(res, 404, { error: 'Not found' });
-        }
-
-        return sendJson(res, 200, { ok: true });
-      }
-
-      return sendJson(res, 405, { error: 'Method not allowed' });
-    }
-
-    return sendJson(res, 404, { error: 'Not found' });
-  } catch (error) {
-    console.error('API error:', error);
-
-    return sendJson(res, 500, {
-      error: error.message || 'Internal server error'
-    });
+/* =========================================================
+   API HANDLER
+   ========================================================= */
+async function handleApi(req, res, url) {
+  if (req.method === 'GET' && url.pathname === '/api/proposals') {
+    const adminMode = isAdmin(req) && url.searchParams.get('admin') === '1';
+    return sendJson(res, 200, await getProposals(adminMode));
   }
+
+  if (req.method === 'GET' && url.pathname === '/api/admin/session') {
+    return sendJson(res, 200, { authenticated: isAdmin(req) });
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/admin/login') {
+    const ip = req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const attempt = loginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+
+    if (attempt.lockedUntil > now) {
+      const remaining = Math.ceil((attempt.lockedUntil - now) / 60000);
+      return sendJson(res, 429, { error: `Too many failed attempts. Try again in ${remaining} minute(s).` });
+    }
+
+    const body = await readBody(req);
+    const pass = String(body.password || '').trim();
+    if (!ALLOWED_PASSWORDS.has(pass)) {
+      attempt.count += 1;
+      if (attempt.count >= MAX_ATTEMPTS) {
+        attempt.lockedUntil = now + LOCKOUT_MS;
+        attempt.count = 0;
+      }
+      loginAttempts.set(ip, attempt);
+      return sendJson(res, 401, { error: 'Invalid password' });
+    }
+
+    loginAttempts.delete(ip);
+    const token = crypto.randomBytes(32).toString('hex');
+    sessions.set(token, Date.now());
+    return sendJson(res, 200, { ok: true, token }, { 'Set-Cookie': `hr_session=${token}; HttpOnly; SameSite=Lax; Path=/` });
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/admin/logout') {
+    const token = parseCookies(req).hr_session;
+    if (token) sessions.delete(token);
+    return sendJson(res, 200, { ok: true }, { 'Set-Cookie': 'hr_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT' });
+  }
+
+  if (!url.pathname.startsWith('/api/proposals')) return false;
+  if (!requireAdmin(req, res)) return true;
+
+  try {
+    if (req.method === 'POST' && url.pathname === '/api/proposals') {
+      const payload = proposalPayload(await readBody(req));
+      const created = await createProposal(payload);
+      return sendJson(res, 201, created);
+    }
+
+    const match = url.pathname.match(/^\/api\/proposals\/([^/]+)$/);
+    if (!match) return sendJson(res, 404, { error: 'Not found' });
+    const id = decodeURIComponent(match[1]);
+
+    if (req.method === 'PUT') {
+      const payload = proposalPayload(await readBody(req));
+      const updated = await updateProposal(id, payload);
+      if (!updated) return sendJson(res, 404, { error: 'Not found' });
+      return sendJson(res, 200, updated);
+    }
+    if (req.method === 'DELETE') {
+      const deleted = await deleteProposal(id);
+      if (!deleted) return sendJson(res, 404, { error: 'Not found' });
+      return sendJson(res, 200, { ok: true });
+    }
+  } catch (error) {
+    return sendJson(res, error.message.includes('UNIQUE') ? 409 : 400, { error: error.message });
+  }
+  return sendJson(res, 405, { error: 'Method not allowed' });
+}
+
+/* =========================================================
+   STATIC FILE SERVER + START
+   ========================================================= */
+const mimeTypes = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml' };
+
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-XSS-Protection': '1; mode=block',
 };
+
+const server = http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') {
+    const origin = req.headers.origin || '*';
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-auth, Access-Control-Request-Private-Network',
+      'Access-Control-Allow-Private-Network': 'true'
+    };
+    if (origin !== '*') {
+      corsHeaders['Access-Control-Allow-Credentials'] = 'true';
+    }
+    res.writeHead(204, corsHeaders);
+    return res.end();
+  }
+  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  if (url.pathname.startsWith('/api/')) {
+    try { if (await handleApi(req, res, url) !== false) return; } catch (error) { return sendJson(res, 400, { error: error.message }); }
+  }
+
+  // Route mapping
+  const requested = (url.pathname === '/' || url.pathname === '/admin' || url.pathname === '/admin.html')
+    ? (fs.existsSync(path.join(ROOT, 'index.html')) ? '/index.html' : '/humsafar-rishta.html')
+    : (url.pathname === '/proposals' || url.pathname === '/proposals.html')
+    ? '/proposals.html'
+    : url.pathname;
+
+  const filePath = path.resolve(ROOT, `.${requested}`);
+
+  if (!filePath.startsWith(ROOT + path.sep) && filePath !== ROOT) {
+    return sendJson(res, 403, { error: 'Forbidden' });
+  }
+
+  const fileName = path.basename(filePath).toLowerCase();
+  if (BLOCKED_FILES.has(fileName) || fileName.startsWith('.')) {
+    return sendJson(res, 403, { error: 'Forbidden' });
+  }
+
+  if (filePath.includes(`${path.sep}node_modules${path.sep}`)) {
+    return sendJson(res, 403, { error: 'Forbidden' });
+  }
+
+  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+    return sendJson(res, 404, { error: 'Not found' });
+  }
+
+  const ext = path.extname(filePath);
+  const contentType = mimeTypes[ext] || 'application/octet-stream';
+  res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS });
+  fs.createReadStream(filePath).pipe(res);
+});
+
+async function start() {
+  server.listen(PORT, () => console.log(`Humsafar Rishta running at http://localhost:${PORT}`));
+}
+
+start().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});
